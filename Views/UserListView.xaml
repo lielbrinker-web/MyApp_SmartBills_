@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MyApp_SmartBills.Views.UsersListView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:MyApp_SmartBills.Model"
+    xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+    Title="ניהול משתמשים"
+    x:DataType="viewmodels:UsersListViewModel"
+    FlowDirection="RightToLeft">
+
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0.0" Color="#1e3c72" />
+            <GradientStop Offset="1.0" Color="#2a5298" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
+
+    <Grid RowDefinitions="Auto, Auto, *" Padding="10">
+
+        <Label
+            Grid.Row="0"
+            Text="רשימת משתמשים"
+            TextColor="White"
+            FontSize="28"
+            FontAttributes="Bold"
+            HorizontalOptions="Center"
+            Margin="0,10,0,20" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" ColumnSpacing="10" Margin="10,0,10,15">
+            <Border Grid.Column="0" StrokeShape="RoundRectangle 12" StrokeThickness="0" BackgroundColor="#20FFFFFF" HeightRequest="50">
+                <SearchBar 
+                    Placeholder="חפש משתמש..." 
+                    PlaceholderColor="#CCCCCC"
+                    Text="{Binding SearchText}" 
+                    TextColor="White"
+                    CancelButtonColor="White"
+                    BackgroundColor="Transparent" />
+            </Border>
+
+            <Button
+                Grid.Column="1"
+                Text="{Binding FilterIcon}"
+                FontFamily="MaterialIcons"
+                FontSize="22"
+                BackgroundColor="#4CAF50"
+                TextColor="White"
+                WidthRequest="55"
+                HeightRequest="50"
+                CornerRadius="12" />
+        </Grid>
+
+        <CollectionView
+            Grid.Row="2"
+            ItemsSource="{Binding AllUsers}"
+            SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
+            SelectionChangedCommand="{Binding NavigateToAccountPageCommand}"
+            SelectionMode="Single">
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="30">
+                    <Label Text="🔍" FontSize="50" HorizontalOptions="Center" />
+                    <Label Text="לא נמצאו משתמשים" TextColor="White" FontSize="20" HorizontalOptions="Center" />
+                    <Label Text="נסו לשנות את החיפוש או משכו למטה לרענון" TextColor="#CCCCCC" FontSize="14" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:AppUser">
+                    <Border
+                        Margin="10,5"
+                        Padding="15"
+                        BackgroundColor="#15FFFFFF"
+                        Stroke="#40FFFFFF"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 15">
+
+                        <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
+
+                            <Border Grid.Column="0" HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22" StrokeThickness="0" Margin="0,0,12,0">
+                                <Image Source="user_icon.png" Aspect="AspectFill" />
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding FirstName}" TextColor="White" FontAttributes="Bold" FontSize="16" />
+                                    <Label Text="{Binding LastName}" TextColor="White" FontAttributes="Bold" FontSize="16" />
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding UserEmail}" TextColor="#CCCCCC" FontSize="12" />
+                            </VerticalStackLayout>
+
+                            <Border Grid.Column="2" BackgroundColor="#30FFFFFF" Padding="8,4" StrokeShape="RoundRectangle 10" StrokeThickness="0" VerticalOptions="Center">
+                                <Label 
+                                    Text="{Binding RegDate, StringFormat='{0:dd/MM/yyyy}'}" 
+                                    TextColor="White" 
+                                    FontSize="10" 
+                                    FontAttributes="Bold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Grid Grid.RowSpan="3" IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
+                <ActivityIndicator IsRunning="True" Color="#4CAF50" Scale="1.5" />
+                <Label Text="טוען משתמשים..." TextColor="White" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+
+</ContentPage>

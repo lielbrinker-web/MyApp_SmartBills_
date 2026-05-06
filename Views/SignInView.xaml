@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MyApp_SmartBills.Views.SignInView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+    x:DataType="viewmodels:SignInViewModel"
+    NavigationPage.HasNavigationBar="False"
+    FlowDirection="RightToLeft">
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0.0" Color="#1e3c72" />
+            <GradientStop Offset="1.0" Color="#2a5298" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
+
+    <Grid>
+        <ScrollView VerticalOptions="Center">
+            <VerticalStackLayout
+                Padding="30"
+                Spacing="20"
+                VerticalOptions="Center">
+
+                <VerticalStackLayout Spacing="5" Margin="0,0,0,30">
+                    <Label
+                        Text="SmartBills"
+                        TextColor="White"
+                        FontSize="42"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="נהלו את החשבונות שלכם בחכמה"
+                        TextColor="#CCCCCC"
+                        FontSize="16"
+                        HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <Label
+                    Text="{Binding ErrorMessage}"
+                    IsVisible="{Binding SignInMessageVisible}"
+                    TextColor="#FF8E8E"
+                    FontSize="14"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    Text="מצב פיתוח פעיל"
+                    IsVisible="{Binding IsDebugMode}"
+                    TextColor="#66ff66"
+                    FontSize="12"
+                    HorizontalOptions="Center" />
+
+                <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="60" BackgroundColor="#20FFFFFF">
+                    <Entry
+                        Placeholder="דואר אלקטרוני"
+                        PlaceholderColor="#CCCCCC"
+                        Text="{Binding UserEmail}"
+                        TextColor="White"
+                        Keyboard="Email"
+                        FontSize="16"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" BackgroundColor="#20FFFFFF" HeightRequest="60">
+                    <Grid ColumnDefinitions="*, Auto" Padding="15,0">
+                        <Entry
+                            Grid.Column="0"
+                            Placeholder="סיסמה"
+                            PlaceholderColor="#CCCCCC"
+                            IsPassword="{Binding EntryAsPassword}"
+                            Text="{Binding UserPassword}"
+                            TextColor="White"
+                            FontSize="16"
+                            VerticalOptions="Center" />
+
+                        <Button
+                            Grid.Column="1"
+                            Text="{Binding PasswordIconCode}"
+                            Command="{Binding TogglePasswordCommand}"
+                            FontFamily="MaterialIcons"
+                            BackgroundColor="Transparent"
+                            TextColor="White"
+                            FontSize="20"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <Grid ColumnDefinitions="Auto, *, Auto" Padding="5,0">
+                    <HorizontalStackLayout Grid.Column="0" Spacing="5" VerticalOptions="Center">
+                        <CheckBox 
+                            IsChecked="{Binding IsRememberMeChecked}" 
+                            Color="#4CAF50" />
+                        <Label 
+                            Text="זכור אותי" 
+                            TextColor="White" 
+                            VerticalOptions="Center" 
+                            FontSize="14" />
+                    </HorizontalStackLayout>
+
+                    <Button
+                        Grid.Column="2"
+                        Text="שכחתי סיסמה?"
+                        TextColor="#CCCCCC"
+                        BackgroundColor="Transparent"
+                        FontSize="14"
+                        Command="{Binding ForgetPasswordCommand}" />
+                </Grid>
+
+                <Button
+                    Text="התחברות"
+                    Command="{Binding SignInCommand}"
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"
+                    HeightRequest="55"
+                    CornerRadius="12"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    Margin="0,10,0,0">
+                    <Button.Shadow>
+                        <Shadow Brush="Black" Offset="0,5" Opacity="0.3" Radius="10" />
+                    </Button.Shadow>
+                </Button>
+
+                <HorizontalStackLayout HorizontalOptions="Center" Margin="0,20,0,0">
+                    <Label
+                        Text="עוד לא רשומים?"
+                        TextColor="White"
+                        FontSize="15"
+                        VerticalTextAlignment="Center" />
+                    <Button
+                        Text="צרו חשבון חדש"
+                        Command="{Binding NavigateToSignUpCommand}"
+                        TextColor="#4CAF50"
+                        BackgroundColor="Transparent"
+                        FontAttributes="Bold"
+                        FontSize="15" />
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
+                <ActivityIndicator IsRunning="True" Color="#4CAF50" Scale="1.5" />
+                <Label Text="מתחבר למערכת..." TextColor="White" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>

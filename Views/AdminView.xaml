@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MyApp_SmartBills.Views.AdminView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+    Title="ניהול מערכת"
+    x:DataType="viewmodels:AdminViewModel"
+    FlowDirection="RightToLeft">
+
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0.0" Color="#1e3c72" />
+            <GradientStop Offset="1.0" Color="#2a5298" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
+
+    <Grid ColumnDefinitions="0.1*,8*,0.1*" RowDefinitions="Auto, Auto, *, Auto" Padding="20">
+
+        <VerticalStackLayout Grid.Row="0" Grid.Column="1" Margin="0,20,0,30" Spacing="5" HorizontalOptions="Center">
+            <Label 
+                Text="מרכז בקרה למנהל" 
+                TextColor="White" 
+                FontSize="28" 
+                FontAttributes="Bold" 
+                HorizontalOptions="Center" />
+            <Label 
+                Text="ניהול משתמשים והגדרות מערכת" 
+                TextColor="#CCCCCC" 
+                FontSize="14" 
+                HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <Border Grid.Row="1" Grid.Column="1"
+                StrokeShape="RoundRectangle 20" 
+                Padding="20" 
+                BackgroundColor="#30FFFFFF" 
+                StrokeThickness="0"
+                Margin="0,0,0,20">
+            <VerticalStackLayout Spacing="15">
+                <Label Text="👤 ניהול קהילה" TextColor="White" FontSize="18" FontAttributes="Bold"/>
+                <Label Text="צפייה בכל המשתמשים הרשומים, עריכת הרשאות וניהול חשבונות." 
+                       TextColor="#DDFFFFFF" 
+                       FontSize="14"/>
+
+                <Button 
+                    Text="לרשימת המשתמשים" 
+                    Command="{Binding NavigateToUsersListViewCommand}"
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    CornerRadius="10" />
+            </VerticalStackLayout>
+        </Border>
+
+        <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="15">
+            <Label Text="⚙️ הגדרות מערכת" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="5,0"/>
+
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="#15FFFFFF" Padding="15" StrokeThickness="0.5" Stroke="#50FFFFFF">
+                <Grid ColumnDefinitions="*, Auto">
+                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                        <Label Text="מצב ניפוי שגיאות (Debug Mode)" TextColor="White" FontSize="16" FontAttributes="Bold"/>
+                        <Label Text="הצגת לוגים ונתוני פיתוח בזמן אמת" TextColor="#CCCCCC" FontSize="12"/>
+                    </VerticalStackLayout>
+
+                    <Switch 
+                        Grid.Column="1"
+                        IsToggled="{Binding IsDebugMode}" 
+                        OnColor="#4CAF50" 
+                        ThumbColor="White"
+                        VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="#15FFFFFF" Padding="15" StrokeThickness="0.5" Stroke="#50FFFFFF">
+                <Grid ColumnDefinitions="*, Auto">
+                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                        <Label Text="מצב תחזוקה" TextColor="White" FontSize="16" FontAttributes="Bold"/>
+                        <Label Text="חסימת גישה זמנית למשתמשים" TextColor="#CCCCCC" FontSize="12"/>
+                    </VerticalStackLayout>
+
+                    <Switch IsToggled="False" OnColor="#FF3B30" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+
+        <Label Grid.Row="3" Grid.Column="1" 
+               Text="SmartBills Admin v1.0.4" 
+               TextColor="#80FFFFFF" 
+               FontSize="12" 
+               HorizontalOptions="Center" 
+               Margin="0,20,0,0"/>
+
+        <Grid Grid.RowSpan="4" Grid.ColumnSpan="3" IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
+            <ActivityIndicator IsRunning="True" Color="White" VerticalOptions="Center" HorizontalOptions="Center"/>
+        </Grid>
+
+    </Grid>
+</ContentPage>

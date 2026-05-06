@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MyApp_SmartBills.Views.AccountView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+    Title="ניהול חשבון"
+    x:DataType="viewmodels:AccountViewModel"
+    FlowDirection="RightToLeft">
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0.0" Color="#1e3c72" />
+            <GradientStop Offset="1.0" Color="#2a5298" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
+
+    <Grid>
+        <Grid ColumnDefinitions="0.1*,8*,0.1*" RowDefinitions="0.5*,2.5*,5.5*,*">
+
+            <HorizontalStackLayout
+                Grid.ColumnSpan="3"
+                IsVisible="{Binding IsDeleteButtonVisible}"
+                Margin="20,10"
+                HorizontalOptions="End"
+                VerticalOptions="Start">
+                <Button
+                    Text="🗑️"
+                    BackgroundColor="Transparent"
+                    Command="{Binding DeleteAccountCommand}"
+                    FontSize="25"
+                    TextColor="#FF6B6B" />
+            </HorizontalStackLayout>
+
+            <StackLayout
+                Grid.Row="1"
+                Grid.Column="1"
+                VerticalOptions="Center"
+                HorizontalOptions="Center">
+
+                <Border
+                    HeightRequest="130"
+                    WidthRequest="130"
+                    Stroke="#FFFFFF"
+                    StrokeThickness="3"
+                    BackgroundColor="Transparent">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="65" />
+                    </Border.StrokeShape>
+
+                    <ImageButton
+                        Source="{Binding UserImageSource, TargetNullValue='user_icon.png'}"
+                        Aspect="AspectFill"
+                        Command="{Binding ChangeImageCommand}"
+                        HeightRequest="130"
+                        WidthRequest="130" />
+                </Border>
+
+                <Label Text="ערוך תמונה" 
+                       TextColor="White" 
+                       FontSize="12" 
+                       HorizontalOptions="Center" 
+                       Margin="0,5,0,0"/>
+            </StackLayout>
+
+            <VerticalStackLayout
+                Grid.Row="2"
+                Grid.Column="1"
+                Spacing="15"
+                Margin="10,0">
+
+                <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#20FFFFFF">
+                    <Entry
+                        Placeholder="שם מלא"
+                        PlaceholderColor="#CCCCCC"
+                        Text="{Binding FullName}"
+                        TextColor="White"
+                        FontSize="16" />
+                </Border>
+
+                <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#10FFFFFF">
+                    <Entry
+                        Placeholder="דואר אלקטרוני"
+                        PlaceholderColor="#CCCCCC"
+                        IsEnabled="False"
+                        Text="{Binding UserEmail}"
+                        TextColor="#BBBBBB"
+                        FontSize="16"
+                        Keyboard="Email" />
+                </Border>
+
+                <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#20FFFFFF">
+                    <Entry
+                        Placeholder="מספר טלפון"
+                        PlaceholderColor="#CCCCCC"
+                        Text="{Binding PhoneNumber}"
+                        TextColor="White"
+                        FontSize="16"
+                        Keyboard="Telephone" />
+                </Border>
+
+                <Label
+                    Text="{Binding ErrorMessage}"
+                    IsVisible="{Binding HasError}"
+                    TextColor="#FF8E8E"
+                    FontSize="13"
+                    HorizontalOptions="Center" />
+
+                <Button
+                    Text="עדכון פרטים"
+                    Command="{Binding UpdateProfileCommand}"
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    FontSize="18"
+                    CornerRadius="12"
+                    HeightRequest="60"
+                    Margin="0,10,0,0">
+                    <Button.Shadow>
+                        <Shadow Brush="Black" Offset="0,5" Opacity="0.3" Radius="10" />
+                    </Button.Shadow>
+                </Button>
+
+            </VerticalStackLayout>
+        </Grid>
+
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
+                <ActivityIndicator IsRunning="True" Color="#4CAF50" Scale="1.5" />
+                <Label Text="מעדכן נתונים..." TextColor="White" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+
+</ContentPage>

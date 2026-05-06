@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="MyApp_SmartBills.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:MyApp_SmartBills.Views"
+    xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+    x:DataType="viewmodels:AppShellViewModel"
+    Title="SmartBills"
+    Shell.NavBarHasShadow="True"
+    Shell.TitleColor="White"
+    FlowDirection="RightToLeft">
+
+    <Shell.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Element">
+                <Setter Property="Shell.BackgroundColor" Value="#1e3c72" />
+                <Setter Property="Shell.ForegroundColor" Value="White" />
+                <Setter Property="Shell.TitleColor" Value="White" />
+                <Setter Property="Shell.DisabledColor" Value="#66FFFFFF" />
+                <Setter Property="Shell.UnselectedColor" Value="#99FFFFFF" />
+            </Style>
+        </ResourceDictionary>
+    </Shell.Resources>
+
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*, Auto" Padding="10,0">
+
+            <Label 
+                Text="SmartBills" 
+                TextColor="White" 
+                FontAttributes="Bold" 
+                FontSize="18" 
+                VerticalOptions="Center" 
+                Grid.Column="0"/>
+
+            <HorizontalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
+
+                <Button
+                    Text="{Binding HomeIcon}"
+                    Command="{Binding NavigateToHomePageCommand}"
+                    FontFamily="MaterialIcons"
+                    FontSize="22"
+                    BackgroundColor="#20FFFFFF"
+                    TextColor="White"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    CornerRadius="20" />
+
+                <Button
+                    Text="{Binding AccountIcon}"
+                    Command="{Binding NavigateToAccountPageCommand}"
+                    FontFamily="MaterialIcons"
+                    FontSize="22"
+                    BackgroundColor="#20FFFFFF"
+                    TextColor="White"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    CornerRadius="20" />
+
+                <Button
+                    Text="{Binding AdminIcon}"
+                    Command="{Binding NavigateToAdminPageCommand}"
+                    IsVisible="{Binding IsAdmin}"
+                    FontFamily="MaterialIcons"
+                    FontSize="22"
+                    BackgroundColor="#4CAF50" 
+                    TextColor="White"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    CornerRadius="20" />
+
+                <Button
+                    Text="{Binding LogoutIcon}"
+                    Command="{Binding LogoutCommand}"
+                    FontFamily="MaterialIcons"
+                    FontSize="22"
+                    BackgroundColor="#30FF0000" 
+                    TextColor="#FF8E8E"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    CornerRadius="20" />
+
+            </HorizontalStackLayout>
+        </Grid>
+    </Shell.TitleView>
+
+    <ShellContent
+        Title="בית"
+        ContentTemplate="{DataTemplate local:MainPageView}"
+        Route="MainPage" />
+
+</Shell>
