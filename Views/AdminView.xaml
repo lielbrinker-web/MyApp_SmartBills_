@@ -4,9 +4,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
-    Title="ניהול מערכת"
+    Title="System Management"
     x:DataType="viewmodels:AdminViewModel"
-    FlowDirection="RightToLeft">
+    FlowDirection="LeftToRight">
 
     <ContentPage.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -19,13 +19,13 @@
 
         <VerticalStackLayout Grid.Row="0" Grid.Column="1" Margin="0,20,0,30" Spacing="5" HorizontalOptions="Center">
             <Label 
-                Text="מרכז בקרה למנהל" 
+                Text="Admin Control Center" 
                 TextColor="White" 
                 FontSize="28" 
                 FontAttributes="Bold" 
                 HorizontalOptions="Center" />
             <Label 
-                Text="ניהול משתמשים והגדרות מערכת" 
+                Text="User Management and System Settings" 
                 TextColor="#CCCCCC" 
                 FontSize="14" 
                 HorizontalOptions="Center" />
@@ -38,13 +38,13 @@
                 StrokeThickness="0"
                 Margin="0,0,0,20">
             <VerticalStackLayout Spacing="15">
-                <Label Text="👤 ניהול קהילה" TextColor="White" FontSize="18" FontAttributes="Bold"/>
-                <Label Text="צפייה בכל המשתמשים הרשומים, עריכת הרשאות וניהול חשבונות." 
+                <Label Text="👤 Community Management" TextColor="White" FontSize="18" FontAttributes="Bold"/>
+                <Label Text="View all registered users, edit permissions, and manage accounts." 
                        TextColor="#DDFFFFFF" 
                        FontSize="14"/>
 
                 <Button 
-                    Text="לרשימת המשתמשים" 
+                    Text="View User List" 
                     Command="{Binding NavigateToUsersListViewCommand}"
                     BackgroundColor="#4CAF50"
                     TextColor="White"
@@ -55,13 +55,13 @@
         </Border>
 
         <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="15">
-            <Label Text="⚙️ הגדרות מערכת" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="5,0"/>
+            <Label Text="⚙️ System Settings" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="5,0"/>
 
             <Border StrokeShape="RoundRectangle 12" BackgroundColor="#15FFFFFF" Padding="15" StrokeThickness="0.5" Stroke="#50FFFFFF">
                 <Grid ColumnDefinitions="*, Auto">
                     <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                        <Label Text="מצב ניפוי שגיאות (Debug Mode)" TextColor="White" FontSize="16" FontAttributes="Bold"/>
-                        <Label Text="הצגת לוגים ונתוני פיתוח בזמן אמת" TextColor="#CCCCCC" FontSize="12"/>
+                        <Label Text="Debug Mode" TextColor="White" FontSize="16" FontAttributes="Bold"/>
+                        <Label Text="Show real-time logs and development data" TextColor="#CCCCCC" FontSize="12"/>
                     </VerticalStackLayout>
 
                     <Switch 
@@ -76,11 +76,11 @@
             <Border StrokeShape="RoundRectangle 12" BackgroundColor="#15FFFFFF" Padding="15" StrokeThickness="0.5" Stroke="#50FFFFFF">
                 <Grid ColumnDefinitions="*, Auto">
                     <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                        <Label Text="מצב תחזוקה" TextColor="White" FontSize="16" FontAttributes="Bold"/>
-                        <Label Text="חסימת גישה זמנית למשתמשים" TextColor="#CCCCCC" FontSize="12"/>
+                        <Label Text="Maintenance Mode" TextColor="White" FontSize="16" FontAttributes="Bold"/>
+                        <Label Text="Temporarily block user access" TextColor="#CCCCCC" FontSize="12"/>
                     </VerticalStackLayout>
 
-                    <Switch IsToggled="False" OnColor="#FF3B30" VerticalOptions="Center" />
+                    <Switch Grid.Column="1" IsToggled="False" OnColor="#FF3B30" VerticalOptions="Center" />
                 </Grid>
             </Border>
         </VerticalStackLayout>

@@ -5,8 +5,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
     x:DataType="viewmodels:SignInViewModel"
+    Title="Sign In"
     NavigationPage.HasNavigationBar="False"
-    FlowDirection="RightToLeft">
+    FlowDirection="LeftToRight">
+
     <ContentPage.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
             <GradientStop Offset="0.0" Color="#1e3c72" />
@@ -29,7 +31,7 @@
                         FontAttributes="Bold"
                         HorizontalOptions="Center" />
                     <Label
-                        Text="נהלו את החשבונות שלכם בחכמה"
+                        Text="Manage your bills smartly"
                         TextColor="#CCCCCC"
                         FontSize="16"
                         HorizontalOptions="Center" />
@@ -43,7 +45,7 @@
                     HorizontalTextAlignment="Center" />
 
                 <Label
-                    Text="מצב פיתוח פעיל"
+                    Text="Development Mode Active"
                     IsVisible="{Binding IsDebugMode}"
                     TextColor="#66ff66"
                     FontSize="12"
@@ -51,7 +53,7 @@
 
                 <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="60" BackgroundColor="#20FFFFFF">
                     <Entry
-                        Placeholder="דואר אלקטרוני"
+                        Placeholder="Email Address"
                         PlaceholderColor="#CCCCCC"
                         Text="{Binding UserEmail}"
                         TextColor="White"
@@ -64,7 +66,7 @@
                     <Grid ColumnDefinitions="*, Auto" Padding="15,0">
                         <Entry
                             Grid.Column="0"
-                            Placeholder="סיסמה"
+                            Placeholder="Password"
                             PlaceholderColor="#CCCCCC"
                             IsPassword="{Binding EntryAsPassword}"
                             Text="{Binding UserPassword}"
@@ -90,7 +92,7 @@
                             IsChecked="{Binding IsRememberMeChecked}" 
                             Color="#4CAF50" />
                         <Label 
-                            Text="זכור אותי" 
+                            Text="Remember me" 
                             TextColor="White" 
                             VerticalOptions="Center" 
                             FontSize="14" />
@@ -98,7 +100,7 @@
 
                     <Button
                         Grid.Column="2"
-                        Text="שכחתי סיסמה?"
+                        Text="Forgot Password?"
                         TextColor="#CCCCCC"
                         BackgroundColor="Transparent"
                         FontSize="14"
@@ -106,7 +108,7 @@
                 </Grid>
 
                 <Button
-                    Text="התחברות"
+                    Text="Sign In"
                     Command="{Binding SignInCommand}"
                     BackgroundColor="#4CAF50"
                     TextColor="White"
@@ -122,12 +124,12 @@
 
                 <HorizontalStackLayout HorizontalOptions="Center" Margin="0,20,0,0">
                     <Label
-                        Text="עוד לא רשומים?"
+                        Text="Not registered yet?"
                         TextColor="White"
                         FontSize="15"
                         VerticalTextAlignment="Center" />
                     <Button
-                        Text="צרו חשבון חדש"
+                        Text="Create a new account"
                         Command="{Binding NavigateToSignUpCommand}"
                         TextColor="#4CAF50"
                         BackgroundColor="Transparent"
@@ -141,7 +143,7 @@
         <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
                 <ActivityIndicator IsRunning="True" Color="#4CAF50" Scale="1.5" />
-                <Label Text="מתחבר למערכת..." TextColor="White" HorizontalOptions="Center" />
+                <Label Text="Signing in..." TextColor="White" HorizontalOptions="Center" />
             </VerticalStackLayout>
         </Grid>
     </Grid>

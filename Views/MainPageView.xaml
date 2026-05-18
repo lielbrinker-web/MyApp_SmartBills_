@@ -4,101 +4,40 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
-    Title="SmartBills - ראשי"
+    Title="Home"
     x:DataType="viewmodels:MainPageViewModel"
-    FlowDirection="RightToLeft">
+    FlowDirection="LeftToRight">
 
-    <ContentPage.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Offset="0.0" Color="#1e3c72" />
-            <GradientStop Offset="1.0" Color="#2a5298" />
-        </LinearGradientBrush>
-    </ContentPage.Background>
+    <Grid>
+        <VerticalStackLayout>
+            <HorizontalStackLayout HorizontalOptions="Center">
+                <Label
+                    Margin="20"
+                    FontSize="20"
+                    Text="{Binding Name}"
+                    TextColor="BlueViolet"
+                    VerticalOptions="Center"
+                    />
 
-    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
+                <Button
+                    Margin="0,20,20,20"
+                    Command="{Binding SettingsCommand}"
+                    FontFamily="MaterialIcons"
+                    FontSize="20"
+                    Text="&#xe8b8;"
+                    VerticalOptions="Center" />
 
-        <HorizontalStackLayout Grid.Row="0" Spacing="15" Margin="0,10,0,20" VerticalOptions="Center">
-            <Border StrokeThickness="0" CornerRadius="25" HeightRequest="50" WidthRequest="50">
-                <Image Source="{Binding UserImageSource, TargetNullValue='user_icon.png'}" Aspect="AspectFill"/>
-            </Border>
-            <VerticalStackLayout>
-                <Label Text="בוקר טוב," TextColor="#CCCCCC" FontSize="14"/>
-                <Label Text="{Binding UserName}" TextColor="White" FontSize="20" FontAttributes="Bold"/>
-            </VerticalStackLayout>
-        </HorizontalStackLayout>
+            </HorizontalStackLayout>
 
-        <Border Grid.Row="1" 
-                StrokeShape="RoundRectangle 20" 
-                Padding="20" 
-                BackgroundColor="#30FFFFFF" 
-                StrokeThickness="0"
-                Margin="0,0,0,20">
-            <VerticalStackLayout Spacing="10">
-                <Label Text="סך הכל לתשלום החודש" TextColor="White" FontSize="16" HorizontalOptions="Center"/>
-                <Label Text="{Binding TotalBillsAmount, StringFormat='₪ {0:N0}'}" 
-                       TextColor="White" 
-                       FontSize="36" 
-                       FontAttributes="Bold" 
-                       HorizontalOptions="Center"/>
+            <Label
+                Margin="20"
+                FontSize="20"
+                Text="Make your greatest app here!"
+                TextColor="CadetBlue"
+                VerticalOptions="Center" 
+                HorizontalOptions="Center"/>
 
-                <Grid ColumnDefinitions="*,*" Margin="0,10,0,0">
-                    <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
-                        <Label Text="שולמו" TextColor="#A0FFFFFF" FontSize="12" HorizontalOptions="Center"/>
-                        <Label Text="{Binding PaidAmount}" TextColor="#4CAF50" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
-                    </VerticalStackLayout>
-                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
-                        <Label Text="ממתינים" TextColor="#A0FFFFFF" FontSize="12" HorizontalOptions="Center"/>
-                        <Label Text="{Binding PendingAmount}" TextColor="#FF8E8E" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
-                    </VerticalStackLayout>
-                </Grid>
-            </VerticalStackLayout>
-        </Border>
-
-        <VerticalStackLayout Grid.Row="2" Spacing="10">
-            <Label Text="חשבונות קרובים" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="5,0"/>
-
-            <CollectionView ItemsSource="{Binding RecentBills}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border Margin="0,5" StrokeShape="RoundRectangle 12" BackgroundColor="#15FFFFFF" Padding="15" StrokeThickness="0.5" Stroke="#50FFFFFF">
-                            <Grid ColumnDefinitions="Auto, *, Auto">
-                                <Label Grid.Column="0" Text="{Binding Icon}" FontSize="24" VerticalOptions="Center" Margin="0,0,15,0"/>
-
-                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                    <Label Text="{Binding BillName}" TextColor="White" FontSize="16" FontAttributes="Bold"/>
-                                    <Label Text="{Binding DueDate, StringFormat='לתאריך: {0:dd/MM/yyyy}'}" TextColor="#CCCCCC" FontSize="12"/>
-                                </VerticalStackLayout>
-
-                                <Label Grid.Column="2" 
-                                       Text="{Binding Amount, StringFormat='₪ {0}'}" 
-                                       TextColor="White" 
-                                       FontSize="16" 
-                                       VerticalOptions="Center" 
-                                       FontAttributes="Bold"/>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
         </VerticalStackLayout>
-
-        <Button Grid.Row="3"
-                Text="+ הוספת חשבון חדש"
-                Command="{Binding AddBillCommand}"
-                BackgroundColor="#4CAF50"
-                TextColor="White"
-                HeightRequest="60"
-                CornerRadius="15"
-                FontAttributes="Bold"
-                FontSize="18">
-            <Button.Shadow>
-                <Shadow Brush="Black" Offset="0,5" Opacity="0.4" Radius="10"/>
-            </Button.Shadow>
-        </Button>
-
-        <Grid Grid.RowSpan="4" IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
-            <ActivityIndicator IsRunning="True" Color="White" VerticalOptions="Center" HorizontalOptions="Center"/>
-        </Grid>
-
     </Grid>
+
 </ContentPage>

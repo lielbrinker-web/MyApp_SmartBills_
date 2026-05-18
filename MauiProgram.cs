@@ -16,10 +16,16 @@ namespace MyApp_SmartBills
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
+                    // רישום פונט האייקונים כדי למנוע קריסת מנוע ה-XAML ב-Windows
+                    fonts.AddFont("MaterialIcons-Regular.ttf", "MaterialIcons");
+                })
+                // תיקון קריטי: הפעלת פונקציות הרישום של הצינור (Pipeline)
+                .RegisterServices()
+                .RegisterViewModels()
+                .RegisterViews();
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
@@ -27,7 +33,6 @@ namespace MyApp_SmartBills
 
         public static MauiAppBuilder RegisterViews(this MauiAppBuilder builder)
         {
-            // Register ViewModels for Dependency Injection
             builder.Services.AddTransient<AppShell>();
             builder.Services.AddTransient<Views.SignInView>();
             builder.Services.AddTransient<Views.SignUpView>();
@@ -37,9 +42,9 @@ namespace MyApp_SmartBills
             builder.Services.AddTransient<Views.AccountView>();
             return builder;
         }
+
         public static MauiAppBuilder RegisterViewModels(this MauiAppBuilder builder)
         {
-            // Register ViewModels for Dependency Injection
             builder.Services.AddTransient<ViewModels.AppShellViewModel>();
             builder.Services.AddTransient<ViewModels.SignInViewModel>();
             builder.Services.AddTransient<ViewModels.SignUpViewModel>();
@@ -49,6 +54,7 @@ namespace MyApp_SmartBills
             builder.Services.AddTransient<ViewModels.AccountViewModel>();
             return builder;
         }
+
         public static MauiAppBuilder RegisterServices(this MauiAppBuilder builder)
         {
             builder.Services.AddSingleton<IAppLogger, LogService>();

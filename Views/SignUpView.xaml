@@ -5,8 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
     x:DataType="viewmodels:SignUpViewModel"
+    Title="Sign Up"
     NavigationPage.HasNavigationBar="False"
-    FlowDirection="RightToLeft">
+    FlowDirection="LeftToRight">
 
     <ContentPage.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -16,18 +17,18 @@
     </ContentPage.Background>
 
     <Grid>
-        <ScrollView VerticalOptions="FillAndExpand">
+        <ScrollView VerticalOptions="Fill">
             <Grid ColumnDefinitions="0.1*,8*,0.1*" RowDefinitions="Auto, Auto, Auto" Padding="0,40">
 
                 <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="5" Margin="0,0,0,30">
                     <Label
-                        Text="הצטרפות ל-SmartBills"
+                        Text="Sign Up for SmartBills"
                         TextColor="White"
                         FontSize="32"
                         FontAttributes="Bold"
                         HorizontalOptions="Center" />
                     <Label
-                        Text="התחילו לנהל את החשבונות שלכם בקלות"
+                        Text="Start managing your bills easily"
                         TextColor="#CCCCCC"
                         FontSize="14"
                         HorizontalOptions="Center" />
@@ -44,7 +45,7 @@
 
                     <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#20FFFFFF">
                         <Entry
-                            Placeholder="שם פרטי"
+                            Placeholder="First Name"
                             PlaceholderColor="#CCCCCC"
                             Text="{Binding FirstName}"
                             TextColor="White"
@@ -53,7 +54,7 @@
 
                     <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#20FFFFFF">
                         <Entry
-                            Placeholder="שם משפחה"
+                            Placeholder="Last Name"
                             PlaceholderColor="#CCCCCC"
                             Text="{Binding LastName}"
                             TextColor="White"
@@ -62,7 +63,7 @@
 
                     <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#20FFFFFF">
                         <Entry
-                            Placeholder="דואר אלקטרוני"
+                            Placeholder="Email Address"
                             PlaceholderColor="#CCCCCC"
                             Text="{Binding UserEmail}"
                             TextColor="White"
@@ -74,7 +75,7 @@
                         <Grid ColumnDefinitions="*, Auto" Padding="15,0">
                             <Entry
                                 Grid.Column="0"
-                                Placeholder="סיסמה"
+                                Placeholder="Password"
                                 PlaceholderColor="#CCCCCC"
                                 IsPassword="{Binding EntryAsPassword}"
                                 Text="{Binding UserPassword}"
@@ -95,7 +96,7 @@
 
                     <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#20FFFFFF">
                         <Entry
-                            Placeholder="מספר נייד"
+                            Placeholder="Phone Number"
                             PlaceholderColor="#CCCCCC"
                             Text="{Binding PhoneNumber}"
                             TextColor="White"
@@ -104,7 +105,7 @@
                     </Border>
 
                     <Button
-                        Text="הרשמה וסיום"
+                        Text="Register &amp; Complete"
                         Command="{Binding SignUpCommand}"
                         BackgroundColor="#4CAF50"
                         TextColor="White"
@@ -120,12 +121,12 @@
 
                     <HorizontalStackLayout HorizontalOptions="Center" Margin="0,10,0,0">
                         <Label
-                            Text="כבר יש לכם חשבון?"
+                            Text="Already have an account?"
                             TextColor="White"
                             FontSize="15"
                             VerticalTextAlignment="Center" />
                         <Button
-                            Text="התחברו כאן"
+                            Text="Sign In here"
                             Command="{Binding NavigateToSignInCommand}"
                             TextColor="#4CAF50"
                             BackgroundColor="Transparent"
@@ -140,7 +141,7 @@
         <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
                 <ActivityIndicator IsRunning="True" Color="#4CAF50" Scale="1.5" />
-                <Label Text="יוצר חשבון חדש..." TextColor="White" HorizontalOptions="Center" />
+                <Label Text="Creating new account..." TextColor="White" HorizontalOptions="Center" />
             </VerticalStackLayout>
         </Grid>
     </Grid>

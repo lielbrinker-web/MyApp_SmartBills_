@@ -9,16 +9,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace MyApp_SmartBills.Service.DBService.FireBase
 {
     public class FirebaseUsersRepository : FirebaseRealtimeService, IAppUserRepository
     {
-        private IAuthService _authService;
-        private IAppLogger _appLogger;
-        private FirebaseClient _firebaseClient;
+        private readonly IAuthService _authService;
+        private readonly IAppLogger _appLogger;
 
-        public FirebaseUsersRepository(IAuthService authService, IAppLogger appLogger)
+        // תיקון קריטי 1: המשתנה הפנימי private FirebaseClient _firebaseClient נמחק!
+        // כעת הקוד ישתמש בצורה נכונה ב-Client שמוגדר ומאותחל בתוך מחלקת האב FirebaseRealtimeService.
+
+        // תיקון קריטי 2: הוספת : base() בבנאי כדי לוודא שמחלקת האב מאתחלת את ה-Client שלה בזמן עליית השירות
+        public FirebaseUsersRepository(IAuthService authService, IAppLogger appLogger) : base()
         {
             _authService = authService;
             _appLogger = appLogger;
@@ -42,6 +44,7 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 throw new Exception(ex.Message);
             }
         }
+
         public async Task<string> CreateAsync(AppUser appUser)
         {
             try
@@ -61,14 +64,16 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 throw new Exception("SignUp new user failed!");
             }
         }
+
         public async Task DeleteAsync(AppUser appUser)
         {
             try
             {
-                //1 Delete user data from Firebase Auth module
+                // 1 Delete user data from Firebase Auth module
                 await _authService.RemoveAuth(appUser.UserEmail!, appUser.UserPassword!);
 
-                //2 Delete user data from Realtime Database
+                // 2 Delete user data from Realtime Database
+                // (משתמש כעת בגלובלי התקין של מחלקת האב)
                 await _firebaseClient!
                     .Child("users")
                     .Child(appUser.Id)
@@ -81,18 +86,21 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 throw new Exception("Delete user failed!");
             }
         }
+
         public List<AppUser> GetAllAsync()
         {
             throw new NotImplementedException();
         }
+
         public async Task<AppUser> GetUserByIdAsync(string userId)
         {
             string errorMessage = string.Empty;
             try
             {
+                // כאן הייתה הקריסה - כעת היא נפתרה מכיוון שהאובייקט מאותחל מהאב
                 var user = await _firebaseClient!
                     .Child("users")
-                    .Child(userId) //using Firebase.Database.Query;
+                    .Child(userId)
                     .OnceSingleAsync<AppUser>();
 
                 return user;
@@ -119,37 +127,8 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
             {
                 throw new Exception($"FirebaseUsersRepository GetUserByIdAsync failed! {ex.Message}");
             }
-
-            //var users = await  
-            //.Child("Users")
-            //.OrderBy("Id")
-            //.EqualTo(userId)
-            //.OnceAsync<AppUser>();
-
-            //	להגדיר ב-Firebase Console תחת לשונית Rules אינדקס לשדה Id:
-            //			{
-            //				"rules": {
-            //					"Users": {
-            //						".indexOn": ["Id"]
-            //					}
-            //				}
-            //			}	
-
-            // מדפיס את תוכן התשובה מהשרת - כאן תראה את הסיבה האמיתית
-            //Debug.WriteLine($"Database Error Content: {ex.ResponseContent}");
-            //Debug.WriteLine($"Database Error Message: {ex.Message}");
-
-            //string userMessage = "אירעה שגיאה בתקשורת עם בסיס הנתונים.";
-
-            //if (ex.Message.Contains("401") || ex.ResponseContent.Contains("Permission denied"))
-            //{
-            //	userMessage = "אין לך הרשאות לבצע את הפעולה הזו (בדוק את ה-Rules).";
-            //}
-            //else if (ex.Message.Contains("404"))
-            //{
-            //	userMessage = "הנתיב בבסיס הנתונים לא נמצא.";
-            //}
         }
+
         public async Task UpdateAsync(AppUser appUser)
         {
             try
@@ -172,6 +151,7 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 throw new Exception("Update failed!");
             }
         }
+
         public async Task RegisterAppUser(AppUser appUser)
         {
             try
@@ -198,6 +178,7 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 throw new Exception("RealTimeDB add new user failed");
             }
         }
+
         public async Task SetToAdmin(string userId)
         {
             try
@@ -205,7 +186,7 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 await _firebaseClient!
                     .Child("users")
                     .Child(userId)
-                    .PatchAsync(new { IsAdmin = true }); // שולח רק את השדה הזה
+                    .PatchAsync(new { IsAdmin = true });
 
                 _appLogger.LogDebug("User admin status updated successfully.");
             }
@@ -215,6 +196,7 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 throw new Exception("SetToAdmin failed!");
             }
         }
+
         public async Task<List<AppUser>> GetAllUserAsync()
         {
             try
@@ -223,7 +205,6 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                     .Child("users")
                     .OnceAsync<AppUser>();
 
-                //users - collection of Firebase objects => Convert to List<AppUser>
                 return users.Select(u => new AppUser()
                 {
                     Id = u.Object.Id,
@@ -242,6 +223,7 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 return new List<AppUser>();
             }
         }
+
         public IObservable<FirebaseEvent<AppUser>> SubscribeToUserChanges()
         {
             try
@@ -249,14 +231,12 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 return _firebaseClient!
                 .Child("users")
                 .AsObservable<AppUser>();
-                //.ObserveOn(System.Reactive.Concurrency.Scheduler.Default);
             }
             catch (Exception ex)
             {
                 _appLogger.LogError("SubscribeToUserChanges failed: " + ex.Message);
                 throw new Exception("SubscribeToUserChanges failed!");
             }
-
         }
     }
 }

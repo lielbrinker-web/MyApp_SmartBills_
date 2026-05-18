@@ -16,6 +16,7 @@ namespace MyApp_SmartBills
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
+            // פתיחת ה-SignInView בתוך NavigationPage כדי לאפשר תנועה קדימה ואחורה (ל-SignUp ובחזרה)
             return new Window(new NavigationPage(_page));
         }
     }

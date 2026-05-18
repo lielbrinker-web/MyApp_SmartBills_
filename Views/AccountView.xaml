@@ -4,9 +4,10 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
-    Title="ניהול חשבון"
+    Title="Account Management"
     x:DataType="viewmodels:AccountViewModel"
-    FlowDirection="RightToLeft">
+    FlowDirection="LeftToRight">
+
     <ContentPage.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
             <GradientStop Offset="0.0" Color="#1e3c72" />
@@ -55,7 +56,7 @@
                         WidthRequest="130" />
                 </Border>
 
-                <Label Text="ערוך תמונה" 
+                <Label Text="Edit Photo" 
                        TextColor="White" 
                        FontSize="12" 
                        HorizontalOptions="Center" 
@@ -70,7 +71,7 @@
 
                 <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#20FFFFFF">
                     <Entry
-                        Placeholder="שם מלא"
+                        Placeholder="Full Name"
                         PlaceholderColor="#CCCCCC"
                         Text="{Binding FullName}"
                         TextColor="White"
@@ -79,7 +80,7 @@
 
                 <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#10FFFFFF">
                     <Entry
-                        Placeholder="דואר אלקטרוני"
+                        Placeholder="Email Address"
                         PlaceholderColor="#CCCCCC"
                         IsEnabled="False"
                         Text="{Binding UserEmail}"
@@ -90,7 +91,7 @@
 
                 <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#20FFFFFF">
                     <Entry
-                        Placeholder="מספר טלפון"
+                        Placeholder="Phone Number"
                         PlaceholderColor="#CCCCCC"
                         Text="{Binding PhoneNumber}"
                         TextColor="White"
@@ -106,7 +107,7 @@
                     HorizontalOptions="Center" />
 
                 <Button
-                    Text="עדכון פרטים"
+                    Text="Update Profile"
                     Command="{Binding UpdateProfileCommand}"
                     BackgroundColor="#4CAF50"
                     TextColor="White"
@@ -126,7 +127,7 @@
         <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
                 <ActivityIndicator IsRunning="True" Color="#4CAF50" Scale="1.5" />
-                <Label Text="מעדכן נתונים..." TextColor="White" />
+                <Label Text="Updating profile..." TextColor="White" />
             </VerticalStackLayout>
         </Grid>
     </Grid>

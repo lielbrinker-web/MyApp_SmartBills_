@@ -5,9 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:models="clr-namespace:MyApp_SmartBills.Model"
     xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
-    Title="ניהול משתמשים"
+    Title="User Management"
     x:DataType="viewmodels:UsersListViewModel"
-    FlowDirection="RightToLeft">
+    FlowDirection="LeftToRight">
 
     <ContentPage.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -20,7 +20,7 @@
 
         <Label
             Grid.Row="0"
-            Text="רשימת משתמשים"
+            Text="User List"
             TextColor="White"
             FontSize="28"
             FontAttributes="Bold"
@@ -30,7 +30,7 @@
         <Grid Grid.Row="1" ColumnDefinitions="*, Auto" ColumnSpacing="10" Margin="10,0,10,15">
             <Border Grid.Column="0" StrokeShape="RoundRectangle 12" StrokeThickness="0" BackgroundColor="#20FFFFFF" HeightRequest="50">
                 <SearchBar 
-                    Placeholder="חפש משתמש..." 
+                    Placeholder="Search user..." 
                     PlaceholderColor="#CCCCCC"
                     Text="{Binding SearchText}" 
                     TextColor="White"
@@ -60,8 +60,8 @@
             <CollectionView.EmptyView>
                 <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="30">
                     <Label Text="🔍" FontSize="50" HorizontalOptions="Center" />
-                    <Label Text="לא נמצאו משתמשים" TextColor="White" FontSize="20" HorizontalOptions="Center" />
-                    <Label Text="נסו לשנות את החיפוש או משכו למטה לרענון" TextColor="#CCCCCC" FontSize="14" HorizontalOptions="Center" />
+                    <Label Text="No users found" TextColor="White" FontSize="20" HorizontalOptions="Center" />
+                    <Label Text="Try modifying your search query or pull down to refresh" TextColor="#CCCCCC" FontSize="14" HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </CollectionView.EmptyView>
 
@@ -105,7 +105,7 @@
         <Grid Grid.RowSpan="3" IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
                 <ActivityIndicator IsRunning="True" Color="#4CAF50" Scale="1.5" />
-                <Label Text="טוען משתמשים..." TextColor="White" />
+                <Label Text="Loading users..." TextColor="White" />
             </VerticalStackLayout>
         </Grid>
     </Grid>

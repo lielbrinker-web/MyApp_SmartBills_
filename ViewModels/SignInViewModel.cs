@@ -4,9 +4,6 @@ using MyApp_SmartBills.Helper;
 using MyApp_SmartBills.Service.DBService;
 using MyApp_SmartBills.Views;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -14,9 +11,7 @@ namespace MyApp_SmartBills.ViewModels
 {
     public partial class SignInViewModel : ObservableObject
     {
-        private readonly Page _page;
         private readonly IAppUserRepository _dbService;
-
         private string _userEmail;
         private string _userPassword;
 
@@ -30,11 +25,11 @@ namespace MyApp_SmartBills.ViewModels
                 {
                     _userEmail = value;
                     OnPropertyChanged();
-                    (SignInCommand as Command).ChangeCanExecute();
-
+                    (SignInCommand as Command)?.ChangeCanExecute();
                 }
             }
         }
+
         public string UserPassword
         {
             get => _userPassword;
@@ -44,7 +39,7 @@ namespace MyApp_SmartBills.ViewModels
                 {
                     _userPassword = value;
                     OnPropertyChanged();
-                    (SignInCommand as Command).ChangeCanExecute();
+                    (SignInCommand as Command)?.ChangeCanExecute();
                 }
             }
         }
@@ -69,46 +64,47 @@ namespace MyApp_SmartBills.ViewModels
 
         [ObservableProperty]
         private bool _isBusy;
-
-        public INavigation Navigation { get; set; }
-
-        //public string Name => "Wellcome " + _authClient.User?.Info?.DisplayName!;		
         #endregion
 
         public ICommand SignInCommand { get; }
 
-        public SignInViewModel(SignUpView view, IAppUserRepository dbService)
+        // תיקון: הסרת SignUpView מהבנאי למניעת תלות מעגלית
+        public SignInViewModel(IAppUserRepository dbService)
         {
-            //Debug Mode
-
+            // Development Mode Active Configuration
             _userEmail = "admin@gmail.com";
             _userPassword = "123456";
-            _page = view;
+
             _isBusy = false;
             _dbService = dbService;
             _isDebugMode = true;
             _entryAsPassword = true;
             _passwordIconCode = FontHelper.OPEN_EYE_ICON;
+
             SignInCommand = new Command(SignIn, () =>
                 !(string.IsNullOrEmpty(UserEmail) || string.IsNullOrEmpty(UserPassword)));
         }
 
         private async void SignIn()
         {
-            //Show Progress Bar
             IsBusy = true;
             try
             {
                 var user = await _dbService.SignInAsync(UserEmail!, UserPassword!);
-
                 IsBusy = false;
 
-                //Set CurrentUser
-                (App.Current as App)!.CurrentUser = user;
+                // Set CurrentUser safely
+                if (App.Current is App currentApp)
+                {
+                    currentApp.CurrentUser = user;
+                }
 
-                // Navigate to Main Page of Shell
-                var mainPage = IPlatformApplication.Current!.Services.GetService<AppShell>();
-                Application.Current!.Windows[0].Page = mainPage;
+                // תיקון גישה בטוחה להחלפת דף הבית הראשי של האפליקציה ל-Shell
+                var appShell = IPlatformApplication.Current?.Services.GetService<AppShell>();
+                if (appShell != null && Application.Current != null)
+                {
+                    Application.Current.MainPage = appShell;
+                }
             }
             catch (Exception ex)
             {
@@ -121,10 +117,7 @@ namespace MyApp_SmartBills.ViewModels
         private void TogglePassword()
         {
             EntryAsPassword = !EntryAsPassword;
-            if (EntryAsPassword)
-                PasswordIconCode = FontHelper.OPEN_EYE_ICON;
-            else
-                PasswordIconCode = FontHelper.CLOSED_EYE_ICON;
+            PasswordIconCode = EntryAsPassword ? FontHelper.OPEN_EYE_ICON : FontHelper.CLOSED_EYE_ICON;
         }
 
         [RelayCommand]
@@ -132,13 +125,23 @@ namespace MyApp_SmartBills.ViewModels
         {
             try
             {
-                await Navigation!.PushAsync(_page);
+                // ניווט מבוסס נתיב מנותק דרך מנגנון ה-Shell המובנה
+                await Shell.Current.GoToAsync(nameof(SignUpView));
             }
             catch (Exception ex)
             {
-                var message = ex.Message;
+                System.Diagnostics.Debug.WriteLine($"Navigation failed: {ex.Message}");
             }
         }
+
+        // תיקון: הוספת הפקודה שהייתה חסרה ונקראה מתוך קובץ ה-XAML
+        [RelayCommand]
+        private async Task ForgetPassword()
+        {
+            // מימוש עתידי לשחזור סיסמה
+            await Task.CompletedTask;
+        }
+
         private void ShowErrorMessage(string message)
         {
             SignInMessageVisible = true;

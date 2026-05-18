@@ -1,9 +1,18 @@
-namespace MyApp_SmartBills.Views;
+using MyApp_SmartBills.ViewModels;
 
-public partial class SignInView : ContentPage
+namespace MyApp_SmartBills.Views
 {
-	public SignInView()
-	{
-		InitializeComponent();
-	}
+    public partial class SignInView : ContentPage
+    {
+        // הבנאי שמקבל את ה-ViewModel באמצעות Dependency Injection
+        public SignInView(SignInViewModel viewModel)
+        {
+            InitializeComponent();
+
+            // הגדרת ה-BindingContext בצורה נקייה
+            BindingContext = viewModel;
+
+            // תיקון: השורה הבעייתית שהייתה כאן (viewModel.Navigation = Navigation;) נמחקה!
+        }
+    }
 }

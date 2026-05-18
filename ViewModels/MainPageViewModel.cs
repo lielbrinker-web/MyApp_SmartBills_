@@ -12,9 +12,22 @@ namespace MyApp_SmartBills.ViewModels
     {
         [ObservableProperty]
         private string _name;
+
         public MainPageViewModel()
         {
-            _name = "Hello " + (App.Current as App)!.CurrentUser!.FirstName!;
+            // הגדרת ערך ברירת מחדל זמני כדי שלא יקרוס בעליית האפליקציה
+            _name = "Hello";
+        }
+
+        // פונקציה חדשה שנקרא לה בכל פעם שהדף מוצג
+        public void RefreshUserData()
+        {
+            var currentUser = (App.Current as App)?.CurrentUser;
+            if (currentUser != null && !string.IsNullOrEmpty(currentUser.FirstName))
+            {
+                // עדכון ה-Property הציבורי (באות גדולה) כדי שה-XAML יתעדכן אוטומטית
+                Name = "Hello " + currentUser.FirstName;
+            }
         }
 
         [RelayCommand]

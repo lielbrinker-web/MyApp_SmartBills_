@@ -20,8 +20,8 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
             // Initialize Firebase Authentication Client
             var config = new FirebaseAuthConfig()
             {
-                ApiKey = "AIzaSyC99SrWsM6rFaEYqQop48Y7itTNLirI3wg",
-                AuthDomain = "lielendproject.firebaseapp.com",
+                ApiKey = "AIzaSyABahhR_hUAJ-SyDudb1vlcv-FI1NchKYs",
+                AuthDomain = "lielsmartbills.firebaseapp.com",
                 Providers = new FirebaseAuthProvider[]
                     {
                         new EmailProvider()

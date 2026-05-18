@@ -10,6 +10,11 @@ public partial class UserListView : ContentPage
         BindingContext = vm;
     }
 
+    private void InitializeComponent()
+    {
+        throw new NotImplementedException();
+    }
+
     protected override void OnAppearing()
     {
         base.OnAppearing();
