@@ -3,7 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using MyApp_SmartBills.Helper;
 using MyApp_SmartBills.Model;
 using MyApp_SmartBills.Service.DBService;
+using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Microsoft.Maui.Controls;
 
 namespace MyApp_SmartBills.ViewModels
 {
@@ -12,76 +15,81 @@ namespace MyApp_SmartBills.ViewModels
         private AppUser? newUser;
         private readonly IAppUserRepository _dbService;
 
-        private string _fName;
-        private string _lName;
-        private string _uEmail;
-        private string _uPassword;
-        private string _uMobile;
+        private string _firstName = string.Empty;
+        private string _lastName = string.Empty;
+        private string _userEmail = string.Empty;
+        private string _userPassword = string.Empty;
+        private string _phoneNumber = string.Empty;
 
         #region Properties
         public INavigation Navigation { get; set; }
-        public string FName
+
+        public string FirstName
         {
-            get => _fName;
+            get => _firstName;
             set
             {
-                if (_fName != value)
+                if (_firstName != value)
                 {
-                    _fName = value;
+                    _firstName = value;
                     OnPropertyChanged();
-                    (SignUpCommand as Command).ChangeCanExecute();
+                    ((Command)SignUpCommand).ChangeCanExecute();
                 }
             }
         }
-        public string LName
+
+        public string LastName
         {
-            get => _lName;
+            get => _lastName;
             set
             {
-                if (_lName != value)
+                if (_lastName != value)
                 {
-                    _lName = value;
+                    _lastName = value;
                     OnPropertyChanged();
-                    (SignUpCommand as Command).ChangeCanExecute();
+                    ((Command)SignUpCommand).ChangeCanExecute();
                 }
             }
         }
-        public string UEmail
+
+        public string UserEmail
         {
-            get => _uEmail;
+            get => _userEmail;
             set
             {
-                if (_uEmail != value)
+                if (_userEmail != value)
                 {
-                    _uEmail = value;
+                    _userEmail = value;
                     OnPropertyChanged();
-                    (SignUpCommand as Command).ChangeCanExecute();
+                    ((Command)SignUpCommand).ChangeCanExecute();
                 }
             }
         }
-        public string UPassword
+
+        public string UserPassword
         {
-            get => _uPassword;
+            get => _userPassword;
             set
             {
-                if (_uPassword != value)
+                if (_userPassword != value)
                 {
-                    _uPassword = value;
+                    _userPassword = value;
                     OnPropertyChanged();
-                    (SignUpCommand as Command).ChangeCanExecute();
+                    ((Command)SignUpCommand).ChangeCanExecute();
                 }
             }
         }
-        public string UMobile
+
+        public string PhoneNumber
         {
-            get => _uMobile;
+            get => _phoneNumber;
             set
             {
-                if (_uMobile != value)
+                if (_phoneNumber != value)
                 {
-                    _uMobile = value;
+                    _phoneNumber = value;
                     OnPropertyChanged();
-                    (SignUpCommand as Command).ChangeCanExecute();
+                    ((Command)SignUpCommand).ChangeCanExecute();
                 }
             }
         }
@@ -99,10 +107,9 @@ namespace MyApp_SmartBills.ViewModels
         private bool _signUpMessageVisible;
 
         [ObservableProperty]
-        private string _errorMessage;
+        private string _errorMessage = string.Empty;
 
         public ICommand SignUpCommand { get; }
-
         #endregion
 
         public SignUpViewModel(IAppUserRepository dbService)
@@ -116,16 +123,15 @@ namespace MyApp_SmartBills.ViewModels
 
         private async void SignUp()
         {
-            //Show Progress Bar
             IsBusy = true;
 
             newUser = new AppUser()
             {
-                FirstName = FName,
-                LastName = LName,
-                UserEmail = UEmail,
-                UserPassword = UPassword,
-                UserMobile = UMobile,
+                FirstName = FirstName,
+                LastName = LastName,
+                UserEmail = UserEmail,
+                UserPassword = UserPassword,
+                UserMobile = PhoneNumber,
                 RegDate = DateTime.Now.ToShortDateString(),
                 UBDate = DateTime.Now.ToShortDateString()
             };
@@ -134,18 +140,18 @@ namespace MyApp_SmartBills.ViewModels
             {
                 newUser.Id = await _dbService!.CreateAsync(newUser);
 
-                //Set as admin
-                //await (_dbService as FirebaseUsersRepository)!.SetToAdmin(newUser.Id);
-                //newUser.IsAdmin = true;
-
                 IsBusy = false;
 
-                //Set CurrentUser
-                (App.Current as App)!.CurrentUser = newUser;
+                if (App.Current is App currentApp)
+                {
+                    currentApp.CurrentUser = newUser;
+                }
 
-                // Navigate to Main Page
                 var mainPage = IPlatformApplication.Current!.Services.GetService<AppShell>();
-                Application.Current!.Windows[0].Page = mainPage;
+                if (Application.Current?.Windows.Count > 0)
+                {
+                    Application.Current.Windows[0].Page = mainPage;
+                }
             }
             catch (Exception ex)
             {
@@ -169,23 +175,28 @@ namespace MyApp_SmartBills.ViewModels
         {
             try
             {
-                await Navigation!.PopAsync();
+                if (Navigation != null)
+                {
+                    await Navigation.PopAsync();
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                //error
+                // Error handling
             }
         }
+
         private bool Validate()
         {
-            var fnameOK = !string.IsNullOrEmpty(FName);
-            var lnameOK = !string.IsNullOrEmpty(LName);
-            var emailOK = !string.IsNullOrEmpty(UEmail);
-            var passOK = string.IsNullOrEmpty(UPassword) ? false : UPassword.Length > 5;
-            var mobileOK = string.IsNullOrEmpty(UMobile) ? false : UMobile.Length == 10;
+            var fnameOK = !string.IsNullOrEmpty(FirstName);
+            var lnameOK = !string.IsNullOrEmpty(LastName);
+            var emailOK = !string.IsNullOrEmpty(UserEmail);
+            var passOK = !string.IsNullOrEmpty(UserPassword) && UserPassword.Length > 5;
+            var mobileOK = !string.IsNullOrEmpty(PhoneNumber) && PhoneNumber.Length == 10;
 
             return fnameOK && lnameOK && emailOK && passOK && mobileOK;
         }
+
         private void ShowErrorMessage(string message)
         {
             SignUpMessageVisible = true;

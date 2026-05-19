@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+             x:Class="MyApp_SmartBills.Views.TransactionsListPage"
+             Title="Transactions History"
+             BackgroundColor="#F5F6FA">
+
+    <ContentPage.BindingContext>
+        <viewmodels:TransactionsListViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="15" RowSpacing="10">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*, *, *" ColumnSpacing="8">
+            <Button Grid.Column="0" Text="All" Command="{Binding FilterChangedCommand}" CommandParameter="All" BackgroundColor="#1e3c72" TextColor="White" HeightRequest="40" CornerRadius="8"/>
+            <Button Grid.Column="1" Text="Personal" Command="{Binding FilterChangedCommand}" CommandParameter="Personal" BackgroundColor="#7F8C8D" TextColor="White" HeightRequest="40" CornerRadius="8"/>
+            <Button Grid.Column="2" Text="Business" Command="{Binding FilterChangedCommand}" CommandParameter="Business" BackgroundColor="#7F8C8D" TextColor="White" HeightRequest="40" CornerRadius="8"/>
+        </Grid>
+
+        <Border Grid.Row="1" Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="10,0" HeightRequest="45" BackgroundColor="White">
+            <Picker SelectedItem="{Binding SelectedMonth}" ItemsSource="{Binding MonthsFilterList}" Title="Filter by Month" />
+        </Border>
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding FilteredTransactions}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border StrokeThickness="0" Margin="0,5" Padding="15" BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+
+                        <Grid ColumnDefinitions="*, Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="3">
+                                <Label Text="{Binding Description}" FontSize="16" FontAttributes="Bold" TextColor="#2C3E50"/>
+                                <Grid ColumnDefinitions="Auto, Auto" ColumnSpacing="10">
+                                    <Label Grid.Column="0" Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" FontSize="12" TextColor="#7F8C8D"/>
+                                    <Label Grid.Column="1" Text="Business" FontSize="11" FontAttributes="Bold" TextColor="#2ECC71" IsVisible="{Binding IsBusiness}"/>
+                                </Grid>
+                            </VerticalStackLayout>
+
+                            <Label Grid.Column="1" Text="{Binding Amount, StringFormat='${0:N2}'}" FontAttributes="Bold" FontSize="16" VerticalOptions="Center" TextColor="#2C3E50"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Grid.Row="3"
+                Text="+ Add New Transaction"
+                Command="{Binding NavigateToAddTransactionCommand}"
+                BackgroundColor="#1e3c72"
+                TextColor="White"
+                HeightRequest="55"
+                CornerRadius="12"
+                FontSize="16"
+                FontAttributes="Bold"
+                Margin="0,10,0,0"/>
+    </Grid>
+</ContentPage>

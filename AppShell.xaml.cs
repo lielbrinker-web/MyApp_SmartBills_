@@ -10,7 +10,8 @@ namespace MyApp_SmartBills
 
             // רישום נתיב הניווט בצורה מפורשת עבור ה-Shell
             Routing.RegisterRoute(nameof(SignUpView), typeof(SignUpView));
-            
+            Routing.RegisterRoute(nameof(Views.AddEditTransactionPage), typeof(Views.AddEditTransactionPage));
+
         }
     }
 }

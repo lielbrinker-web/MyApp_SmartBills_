@@ -9,6 +9,8 @@ namespace MyApp_SmartBills.Views
         {
             InitializeComponent();
 
+            viewModel.Navigation = this.Navigation;
+
             // הגדרת ה-BindingContext בצורה נקייה
             BindingContext = viewModel;
 

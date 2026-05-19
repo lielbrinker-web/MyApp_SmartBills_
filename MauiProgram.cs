@@ -16,10 +16,9 @@ namespace MyApp_SmartBills
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                    // רישום פונט האייקונים כדי למנוע קריסת מנוע ה-XAML ב-Windows
+                    // רישום פונט האייקונים - ודאי שהשם ב-XAML תואם ל-MaterialIcons
                     fonts.AddFont("MaterialIcons-Regular.ttf", "MaterialIcons");
                 })
-                // תיקון קריטי: הפעלת פונקציות הרישום של הצינור (Pipeline)
                 .RegisterServices()
                 .RegisterViewModels()
                 .RegisterViews();
@@ -31,6 +30,7 @@ namespace MyApp_SmartBills
             return builder.Build();
         }
 
+        // פונקציית הרחבה לרישום כל מסכי הממשק (Views / Pages)
         public static MauiAppBuilder RegisterViews(this MauiAppBuilder builder)
         {
             builder.Services.AddTransient<AppShell>();
@@ -40,9 +40,19 @@ namespace MyApp_SmartBills
             builder.Services.AddTransient<Views.AdminView>();
             builder.Services.AddTransient<Views.UsersListView>();
             builder.Services.AddTransient<Views.AccountView>();
+
+            // הוספת הדפים החדשים של מערכת הניהול הפיננסי לצינור ה-Services
+            builder.Services.AddTransient<Views.DashboardPage>();
+            builder.Services.AddTransient<Views.TransactionsListPage>();
+            builder.Services.AddTransient<Views.WarrantiesListPage>();
+            builder.Services.AddTransient<Views.ReportsPage>();
+
+            builder.Services.AddTransient<ViewModels.TransactionsListViewModel>();
+
             return builder;
         }
 
+        // פונקציית הרחבה לרישום כל מחלקות הלוגיקה (ViewModels)
         public static MauiAppBuilder RegisterViewModels(this MauiAppBuilder builder)
         {
             builder.Services.AddTransient<ViewModels.AppShellViewModel>();
@@ -52,9 +62,14 @@ namespace MyApp_SmartBills
             builder.Services.AddTransient<ViewModels.AdminViewModel>();
             builder.Services.AddTransient<ViewModels.UsersListViewModel>();
             builder.Services.AddTransient<ViewModels.AccountViewModel>();
+
+            // הוספת ה-ViewModel החדש של מסך הבית לצינור ה-Services
+            builder.Services.AddTransient<ViewModels.DashboardViewModel>();
+
             return builder;
         }
 
+        // פונקציית הרחבה לרישום שכבת השירותים והגישה לנתונים (Services / Repositories)
         public static MauiAppBuilder RegisterServices(this MauiAppBuilder builder)
         {
             builder.Services.AddSingleton<IAppLogger, LogService>();

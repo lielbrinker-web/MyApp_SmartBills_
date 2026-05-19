@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+             x:Class="MyApp_SmartBills.Views.WarrantiesListPage"
+             Title="My Warranties"
+             BackgroundColor="#F5F6FA">
+
+    <ContentPage.BindingContext>
+        <viewmodels:WarrantiesListViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid RowDefinitions="*, Auto" Padding="15">
+
+        <CollectionView Grid.Row="0" ItemsSource="{Binding Warranties}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Stroke="{Binding StatusColor}" StrokeThickness="2" Margin="0,8" Padding="15" BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+
+                        <Grid ColumnDefinitions="*, Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="5">
+                                <Label Text="{Binding ProductName}" FontSize="18" FontAttributes="Bold" TextColor="#2C3E50"/>
+                                <Label Text="{Binding PurchaseDate, StringFormat='Purchased: {0:dd/MM/yyyy}'}" FontSize="13" TextColor="#7F8C8D"/>
+                                <Label Text="{Binding ExpiryDate, StringFormat='Expires: {0:dd/MM/yyyy}'}" FontSize="13" TextColor="#7F8C8D"/>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center">
+                                <Label Text="{Binding DaysRemaining, StringFormat='{0} Days Left'}" 
+                                       TextColor="{Binding StatusColor}" 
+                                       FontAttributes="Bold" 
+                                       FontSize="14" 
+                                       HorizontalOptions="End"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Grid.Row="1"
+                Text="+ Add New Warranty"
+                Command="{Binding NavigateToAddWarrantyCommand}"
+                BackgroundColor="#1e3c72"
+                TextColor="White"
+                HeightRequest="55"
+                CornerRadius="12"
+                FontSize="16"
+                FontAttributes="Bold"
+                Margin="0,10,0,0"/>
+    </Grid>
+</ContentPage>

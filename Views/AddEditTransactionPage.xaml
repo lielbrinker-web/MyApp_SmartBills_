@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+             x:Class="MyApp_SmartBills.Views.AddEditTransactionPage"
+             Title="Add / Edit Transaction"
+             BackgroundColor="#F5F6FA">
+
+    <ContentPage.BindingContext>
+        <viewmodels:AddEditTransactionViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="18">
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Amount ($) *" TextColor="#2C3E50" FontAttributes="Bold" />
+                <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="10,0" HeightRequest="50" BackgroundColor="White">
+                    <Entry Text="{Binding AmountText}" Placeholder="0.00" Keyboard="Numeric" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Date *" TextColor="#2C3E50" FontAttributes="Bold" />
+                <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="10,0" HeightRequest="50" BackgroundColor="White">
+                    <DatePicker Date="{Binding TransactionDate}" Format="dd/MM/yyyy" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Category *" TextColor="#2C3E50" FontAttributes="Bold" />
+                <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="10,0" HeightRequest="50" BackgroundColor="White">
+                    <Picker SelectedItem="{Binding SelectedCategory}" 
+                            ItemsSource="{Binding Categories}" 
+                            Title="Select Category" />
+                </Border>
+            </VerticalStackLayout>
+
+            <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="15,10" BackgroundColor="White" Margin="0,5">
+                <Grid ColumnDefinitions="*, Auto">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="Is Business Expense?" FontAttributes="Bold" TextColor="#2C3E50"/>
+                        <Label Text="Uncheck for Personal" FontSize="12" TextColor="#7F8C8D"/>
+                    </VerticalStackLayout>
+                    <Switch Grid.Column="1" IsToggled="{Binding IsBusiness}" OnColor="#2ECC71" />
+                </Grid>
+            </Border>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Receipt / Document" TextColor="#2C3E50" FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
+                    <Button Grid.Column="0" Text="📷 Take Photo" Command="{Binding TakePhotoCommand}" BackgroundColor="#34495E" TextColor="White" CornerRadius="8"/>
+                    <Button Grid.Column="1" Text="🖼️ Gallery" Command="{Binding PickImageCommand}" BackgroundColor="#7F8C8D" TextColor="White" CornerRadius="8"/>
+                </Grid>
+                <Image Source="{Binding ReceiptImagePath}" HeightRequest="120" Aspect="AspectFit" HorizontalOptions="Center" Margin="0,5"/>
+            </VerticalStackLayout>
+
+            <Button Text="Save Transaction" Command="{Binding SaveTransactionCommand}" BackgroundColor="#1e3c72" TextColor="White" HeightRequest="55" CornerRadius="12" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
+            <Button Text="Cancel" Command="{Binding CancelCommand}" BackgroundColor="Transparent" TextColor="#7F8C8D" BorderColor="#7F8C8D" BorderWidth="1" HeightRequest="50" CornerRadius="12" FontSize="16" FontAttributes="Bold"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

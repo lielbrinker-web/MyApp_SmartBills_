@@ -11,11 +11,13 @@ namespace MyApp_SmartBills.ViewModels
 {
     public partial class SignInViewModel : ObservableObject
     {
+        private Page _signupView;
         private readonly IAppUserRepository _dbService;
         private string _userEmail;
         private string _userPassword;
 
         #region Properties
+        public INavigation Navigation { get; set; }
         public string UserEmail
         {
             get => _userEmail;
@@ -69,8 +71,11 @@ namespace MyApp_SmartBills.ViewModels
         public ICommand SignInCommand { get; }
 
         // תיקון: הסרת SignUpView מהבנאי למניעת תלות מעגלית
-        public SignInViewModel(IAppUserRepository dbService)
+        public SignInViewModel(IAppUserRepository dbService, SignUpView signupView)
         {
+            //SignUp page for navigate
+            _signupView = signupView;
+
             // Development Mode Active Configuration
             _userEmail = "admin@gmail.com";
             _userPassword = "123456";
@@ -126,7 +131,8 @@ namespace MyApp_SmartBills.ViewModels
             try
             {
                 // ניווט מבוסס נתיב מנותק דרך מנגנון ה-Shell המובנה
-                await Shell.Current.GoToAsync(nameof(SignUpView));
+                //await Shell.Current.GoToAsync(nameof(SignUpView));
+                await Navigation!.PushAsync(_signupView);   
             }
             catch (Exception ex)
             {

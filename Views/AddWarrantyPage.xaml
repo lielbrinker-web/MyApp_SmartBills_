@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+             x:Class="MyApp_SmartBills.Views.AddWarrantyPage"
+             Title="Add New Warranty"
+             BackgroundColor="#F5F6FA">
+
+    <ContentPage.BindingContext>
+        <viewmodels:AddWarrantyViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="20">
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Product Name *" TextColor="#2C3E50" FontAttributes="Bold" />
+                <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="10,0" HeightRequest="50" BackgroundColor="White">
+                    <Entry Text="{Binding ProductName}" Placeholder="e.g., Sony TV, Washing Machine" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Purchase Date *" TextColor="#2C3E50" FontAttributes="Bold" />
+                <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="10,0" HeightRequest="50" BackgroundColor="White">
+                    <DatePicker Date="{Binding PurchaseDate}" Format="dd/MM/yyyy" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Warranty Duration (Months) *" TextColor="#2C3E50" FontAttributes="Bold" />
+                <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="10,0" HeightRequest="50" BackgroundColor="White">
+                    <Entry Text="{Binding WarrantyMonthsText}" Placeholder="e.g., 12, 24, 36" Keyboard="Numeric" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Receipt Image" TextColor="#2C3E50" FontAttributes="Bold" />
+                <Button Text="📷 Upload Receipt" 
+                        Command="{Binding PickImageCommand}" 
+                        BackgroundColor="#7F8C8D" 
+                        TextColor="White" 
+                        CornerRadius="8"/>
+
+                <Image Source="{Binding ReceiptImagePath}" 
+                       HeightRequest="150" 
+                       Aspect="AspectFit" 
+                       HorizontalOptions="Center" 
+                       Margin="0,10,0,0"/>
+            </VerticalStackLayout>
+
+            <Button Text="Save Product"
+                    Command="{Binding SaveWarrantyCommand}"
+                    BackgroundColor="#2ECC71"
+                    TextColor="White"
+                    HeightRequest="55"
+                    CornerRadius="12"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    Margin="0,20,0,0"/>
+
+            <Button Text="Cancel &amp; Go Back"
+                    Command="{Binding CancelCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="#7F8C8D"
+                    BorderColor="#7F8C8D"
+                    BorderWidth="1"
+                    HeightRequest="50"
+                    CornerRadius="12"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    Margin="0,5,0,0"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
