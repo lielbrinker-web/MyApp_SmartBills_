@@ -54,8 +54,8 @@ namespace MyApp_SmartBills.ViewModels
             // תיקון מוחלט: שימוש ב-Category הקיים במודל שלך במקום Description או Title
             _allTransactions = new List<Transaction>
             {
-               // new Transaction { Id = "1", Category = TransactionCategory.Rent, Amount = 1500, IsBusiness = true, Date = DateTime.Today },
-               // new Transaction { Id = "2", Category = TransactionCategory.Groceries, Amount = 320, IsBusiness = false, Date = DateTime.Today.AddDays(-1) },
+               new Transaction { Id = "1", Category = TransactionCategory.Rent, Amount = 1500, IsBusiness = true, Date = DateTime.Today },
+               new Transaction { Id = "2", Category = TransactionCategory.Food, Amount = 320, IsBusiness = false, Date = DateTime.Today.AddDays(-1) },
                 new Transaction { Id = "3", Category = TransactionCategory.Salary, Amount = 4500, IsBusiness = true, Date = DateTime.Today.AddDays(-2) },
                 new Transaction { Id = "4", Category = TransactionCategory.Electricity, Amount = 85, IsBusiness = false, Date = DateTime.Today.AddDays(-3) },
                 new Transaction { Id = "5", Category = TransactionCategory.Other, Amount = 120.50, IsBusiness = false, Date = DateTime.Today.AddDays(-4) }

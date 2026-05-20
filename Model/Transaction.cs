@@ -17,7 +17,8 @@ namespace MyApp_SmartBills.Model
         Entertainment, // בילויים ופנאי
         Transport,     // תחבורה ודלק
         Shopping,      // קניות
-        Salary,        // משכורת
+        Salary,         // משכורת
+        Rent,           //שכר דירה 
         Other          // אחר
     }
 
