@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-    x:Class="MyApp_SmartBills.Views.UsersListView"
+    x:Class="MyApp_SmartBills.Views.UserListView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:models="clr-namespace:MyApp_SmartBills.Model"
     xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
     Title="User Management"
-    x:DataType="viewmodels:UsersListViewModel"
+    x:DataType="viewmodels:UserListViewModel"
     FlowDirection="LeftToRight">
 
     <ContentPage.Background>

@@ -4,6 +4,7 @@ using MyApp_SmartBills.Helper;
 using MyApp_SmartBills.Service.DBService;
 using MyApp_SmartBills.Views;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -70,10 +71,8 @@ namespace MyApp_SmartBills.ViewModels
 
         public ICommand SignInCommand { get; }
 
-        // תיקון: הסרת SignUpView מהבנאי למניעת תלות מעגלית
         public SignInViewModel(IAppUserRepository dbService, SignUpView signupView)
         {
-            //SignUp page for navigate
             _signupView = signupView;
 
             // Development Mode Active Configuration
@@ -98,18 +97,23 @@ namespace MyApp_SmartBills.ViewModels
                 var user = await _dbService.SignInAsync(UserEmail!, UserPassword!);
                 IsBusy = false;
 
-                // Set CurrentUser safely
-                if (App.Current is App currentApp)
+                // השמה בטוחה של המשתמש הנוכחי במחלקת ה-App
+                if (Application.Current is App currentApp)
                 {
                     currentApp.CurrentUser = user;
                 }
 
-                // תיקון גישה בטוחה להחלפת דף הבית הראשי של האפליקציה ל-Shell
-                var appShell = IPlatformApplication.Current?.Services.GetService<AppShell>();
-                if (appShell != null && Application.Current != null)
+                // תיקון סופי: שליפת ה-AppShell הרשום במערכת כדי לשמור על הזרקת תלויות תקינה לדפים
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    Application.Current.MainPage = appShell;
-                }
+                    var appShell = IPlatformApplication.Current?.Services.GetService<AppShell>();
+                    var appWindow = Application.Current?.Windows.FirstOrDefault();
+
+                    if (appWindow != null && appShell != null)
+                    {
+                        appWindow.Page = appShell; // החלפת הדף ל-Shell המוזרק כהלכה
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -130,9 +134,10 @@ namespace MyApp_SmartBills.ViewModels
         {
             try
             {
-                // ניווט מבוסס נתיב מנותק דרך מנגנון ה-Shell המובנה
-                //await Shell.Current.GoToAsync(nameof(SignUpView));
-                await Navigation!.PushAsync(_signupView);   
+                if (Navigation != null)
+                {
+                    await Navigation.PushAsync(_signupView);
+                }
             }
             catch (Exception ex)
             {
@@ -140,11 +145,9 @@ namespace MyApp_SmartBills.ViewModels
             }
         }
 
-        // תיקון: הוספת הפקודה שהייתה חסרה ונקראה מתוך קובץ ה-XAML
         [RelayCommand]
         private async Task ForgetPassword()
         {
-            // מימוש עתידי לשחזור סיסמה
             await Task.CompletedTask;
         }
 

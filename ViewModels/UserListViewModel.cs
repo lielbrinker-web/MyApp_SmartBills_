@@ -1,161 +1,69 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Firebase.Auth;
-using Firebase.Database.Streaming;
-using MyApp_SmartBills.Helper;
-using MyApp_SmartBills.Model;
-using MyApp_SmartBills.Service;
-using MyApp_SmartBills.Service.DBService;
-using MyApp_SmartBills.Service.DBService.FireBase;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-
+using MyApp_SmartBills.Model;
+using MyApp_SmartBills.Service.DBService;
+using Microsoft.Maui.ApplicationModel;
 
 namespace MyApp_SmartBills.ViewModels
 {
-    public partial class UsersListViewModel : ObservableObject
+    public partial class UserListViewModel : INotifyPropertyChanged
     {
-        private readonly IAppLogger _appLogger;
-        private readonly IAlertService _alertService;
-        private readonly IAppUserRepository _dbService;
+        private readonly IAppUserRepository _userRepository;
+        private ObservableCollection<AppUser> _usersList;
 
-        IDisposable? _dbSubscription; // Cancel subscription to db updates when not needed
-        private List<AppUser> _allUsers = new(); //List of users to be displayed
-        public ObservableCollection<AppUser> AllUsers { get; set; }
-
-        [ObservableProperty]
-        private AppUser? _selectedUser;
-
-        [ObservableProperty]
-        private bool _isBusy;
-
-        [ObservableProperty]
-        private string _filterIcon;
-
-        [ObservableProperty]
-        private string _searchText;
-
-        //public Command? GetAllUsersCommand { get { return new Command(GetUsersListFromDB); } }
-
-        public UsersListViewModel(IAlertService alertService, IAppUserRepository dbService, IAppLogger appLogger)
+        public ObservableCollection<AppUser> UsersList
         {
-            _appLogger = appLogger;
-            _alertService = alertService;
-            _dbService = dbService;
-            FilterIcon = FontHelper.FILTER_ON_ICON;
-            AllUsers = new ObservableCollection<AppUser>();
-        }
-
-        ///////////////////////////////////////////////////////////////////
-
-        [RelayCommand]
-        private void ClearFilter()
-        {
-            throw new NotImplementedException();
-        }
-
-        [RelayCommand]
-        private void Search()
-        {
-            throw new NotImplementedException();
-        }
-
-        [RelayCommand]
-        private async Task NavigateToAccountPage()
-        {
-            if (SelectedUser != null)
+            get => _usersList;
+            set
             {
-                Dictionary<string, object> param = new Dictionary<string, object>();
-                param.Add("selectedUser", SelectedUser);
-                await Shell.Current.GoToAsync("AccountView", param);
-            }
-            else
-            {
-                // Handle the case where user is null, if necessary
+                _usersList = value;
+                OnPropertyChanged();
             }
         }
 
-        private async Task SubscribeToDbUpdates()
+        public UserListViewModel(IAppUserRepository userRepository)
         {
-            if (_dbSubscription != null) CancelDbSubscription();
+            _userRepository = userRepository;
+            UsersList = new ObservableCollection<AppUser>();
 
-            _dbSubscription = (_dbService as FirebaseUsersRepository)!.SubscribeToUserChanges()
-                .Subscribe(item =>
+            _ = LoadUsersFromFirebase();
+        }
+
+        public async Task LoadUsersFromFirebase()
+        {
+            try
+            {
+                // קריאה אסינכרונית תקינה לטעינת המשתמשים
+                var users = await _userRepository.GetAllAsync();
+
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    //Update UI on main thread
-                    //Shell.Current.Dispatcher.Dispatch(() =>
-                    MainThread.BeginInvokeOnMainThread(() =>
+                    UsersList.Clear();
+                    if (users != null)
                     {
-                        if (item.EventType == FirebaseEventType.InsertOrUpdate)
+                        foreach (var user in users)
                         {
-                            AddOrUpdateUser(item.Object);
+                            UsersList.Add(user);
                         }
-                        else if (item.EventType == FirebaseEventType.Delete)
-                        {
-                            // משתמשים ב-Key למחיקה בטוחה
-                            RemoveUser(item.Key);
-                        }
-                        FillUsersList();
-                    });
-                },
-                ex => _appLogger.LogDebug($"Error: {ex.Message}"));
-        }
-
-        private void FillUsersList()
-        {
-            AllUsers.Clear(); // Clear the existing collection
-            foreach (var user in _allUsers)
+                    }
+                });
+            }
+            catch (Exception ex)
             {
-                AllUsers.Add(user); // Add each user to the ObservableCollection
+                System.Diagnostics.Debug.WriteLine($"Error loading users: {ex.Message}");
             }
         }
 
-        private void AddOrUpdateUser(AppUser item)
+        #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            //Check if user already exists in the list
-            var index = _allUsers.FindIndex(u => u.Id == item.Id);
-
-            if (index != -1) // המשתמש קיים - נחליף אותו במיקום שלו
-            {
-                _allUsers[index] = item;
-            }
-            else // משתמש חדש - נוסיף לרשימה
-            {
-                _allUsers.Add(item);
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        private void RemoveUser(string userId)
-        {
-            //bool confirm = await Shell.Current.DisplayAlert("Firebase App", "Remove User?", "Yes","No");
-            var item = _allUsers.Where(u => u.Id == userId).FirstOrDefault();
-            if (item != null)
-            {
-                _allUsers.Remove(item);
-            }
-        }
-
-        private void CancelDbSubscription()
-        {
-            _dbSubscription?.Dispose();
-            _dbSubscription = null;
-        }
-
-        internal async void OnAppearing()
-        {
-            //Clear existing users list before subscribing to db updates
-            _allUsers.Clear();
-            await SubscribeToDbUpdates(); //Subscribe to db updates			
-            SelectedUser = null!;
-        }
-
-        internal void OnDisappearing()
-        {
-            CancelDbSubscription();
-        }
+        #endregion
     }
 }

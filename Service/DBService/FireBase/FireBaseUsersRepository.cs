@@ -87,9 +87,32 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
             }
         }
 
-        public List<AppUser> GetAllAsync()
+        // --- התיקון המרכזי כאן: הפונקציה מומשה בצורה אסינכרונית מלאה שמתאימה לאינטרפייס ול-ViewModel ---
+        public async Task<List<AppUser>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var users = await _firebaseClient!
+                    .Child("users")
+                    .OnceAsync<AppUser>();
+
+                return users.Select(u => new AppUser()
+                {
+                    Id = u.Object.Id,
+                    FirstName = u.Object.FirstName,
+                    LastName = u.Object.LastName,
+                    UserEmail = u.Object.UserEmail,
+                    UserPassword = u.Object.UserPassword,
+                    RegDate = u.Object.RegDate,
+                    UBDate = u.Object.UBDate,
+                    IsAdmin = u.Object.IsAdmin
+                }).ToList();
+            }
+            catch (FirebaseException ex)
+            {
+                _appLogger.LogDebug($"GetAllUsers failed: {ex.Message}");
+                return new List<AppUser>();
+            }
         }
 
         public async Task<AppUser> GetUserByIdAsync(string userId)
@@ -194,33 +217,6 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
             {
                 _appLogger.LogDebug($"Error updating field: {ex.Message}");
                 throw new Exception("SetToAdmin failed!");
-            }
-        }
-
-        public async Task<List<AppUser>> GetAllUserAsync()
-        {
-            try
-            {
-                var users = await _firebaseClient!
-                    .Child("users")
-                    .OnceAsync<AppUser>();
-
-                return users.Select(u => new AppUser()
-                {
-                    Id = u.Object.Id,
-                    FirstName = u.Object.FirstName,
-                    LastName = u.Object.LastName,
-                    UserEmail = u.Object.UserEmail,
-                    UserPassword = u.Object.UserPassword,
-                    RegDate = u.Object.RegDate,
-                    UBDate = u.Object.UBDate,
-                    IsAdmin = u.Object.IsAdmin
-                }).ToList();
-            }
-            catch (FirebaseException ex)
-            {
-                _appLogger.LogDebug($"GetAllUsers failed: {ex.Message}");
-                return new List<AppUser>();
             }
         }
 

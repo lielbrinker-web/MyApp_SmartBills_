@@ -1,24 +1,24 @@
 using MyApp_SmartBills.ViewModels;
 
-namespace MyApp_SmartBills.Views
+namespace MyApp_SmartBills.Views;
+
+public partial class DashboardPage : ContentPage
 {
-    public partial class DashboardPage : ContentPage
+    public DashboardPage(DashboardViewModel vm)
     {
-        private readonly DashboardViewModel _viewModel;
+        InitializeComponent();
+        BindingContext = vm;
+    }
 
-        public DashboardPage(DashboardViewModel viewModel)
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        // הרצת רענון הערכים והברכה בכל פעם שהדף עולה
+        if (BindingContext is DashboardViewModel vm)
         {
-            InitializeComponent();
-            _viewModel = viewModel;
-            BindingContext = _viewModel;
-        }
-
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-
-            // רענון הברכה בכל כניסה מחדש למסך
-            _viewModel?.UpdateDashboardWelcome();
+            vm.RefreshDashboardValues();
+            vm.UpdateDashboardWelcome();
         }
     }
 }

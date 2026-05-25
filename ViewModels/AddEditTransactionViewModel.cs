@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
+using MyApp_SmartBills.Model;
+using MyApp_SmartBills.Service; // <--- הוספנו
 
 namespace MyApp_SmartBills.ViewModels
 {
     public class AddEditTransactionViewModel : INotifyPropertyChanged
     {
+        private readonly IFinancialDataService _financialDataService; // <--- הוספנו
         private string _amountText = string.Empty;
         private DateTime _transactionDate = DateTime.Today;
         private string _selectedCategory = string.Empty;
@@ -48,10 +51,9 @@ namespace MyApp_SmartBills.ViewModels
             set { _receiptImagePath = value; OnPropertyChanged(); }
         }
 
-        // רשימת קטגוריות לבחירה (Picker)
         public List<string> Categories { get; } = new List<string>
         {
-            "Electricity", "Water", "Rent", "Salary", "Groceries", "Fuel", "Other"
+            "Electricity", "Water", "Rent", "Salary", "Groceries", "Fuel", "Entertainment", "Other"
         };
         #endregion
 
@@ -60,8 +62,11 @@ namespace MyApp_SmartBills.ViewModels
         public ICommand SaveTransactionCommand { get; }
         public ICommand CancelCommand { get; }
 
-        public AddEditTransactionViewModel()
+        // עדכון הבנאי לקבלת השירות
+        public AddEditTransactionViewModel(IFinancialDataService financialDataService)
         {
+            _financialDataService = financialDataService;
+
             PickImageCommand = new Command(async () => await PickImage());
             TakePhotoCommand = new Command(async () => await TakePhoto());
             SaveTransactionCommand = new Command(async () => await SaveTransaction());
@@ -75,7 +80,7 @@ namespace MyApp_SmartBills.ViewModels
                 var result = await MediaPicker.Default.PickPhotoAsync();
                 if (result != null) ReceiptImagePath = result.FullPath;
             }
-            catch (Exception) { /* טיפול בשגיאות או ביטול */ }
+            catch (Exception) { }
         }
 
         private async Task TakePhoto()
@@ -88,7 +93,7 @@ namespace MyApp_SmartBills.ViewModels
                     if (result != null) ReceiptImagePath = result.FullPath;
                 }
             }
-            catch (Exception) { /* טיפול בשגיאות או ביטול */ }
+            catch (Exception) { }
         }
 
         private async Task SaveTransaction()
@@ -105,8 +110,25 @@ namespace MyApp_SmartBills.ViewModels
                 return;
             }
 
-            // כאן בעתיד נשמור ל-Firebase (הכנסה/הוצאה, פרטי/עסקי וכו')
-            await Application.Current!.MainPage!.DisplayAlert("Success", "Transaction saved successfully (Mock)!", "OK");
+            // המרה של מחרוזת ה-Category ל-Enum המקורי שלך
+            if (!Enum.TryParse(SelectedCategory, out TransactionCategory categoryEnum))
+            {
+                categoryEnum = TransactionCategory.Other;
+            }
+
+            // יצירת האובייקט האמיתי ושמירתו בשירות המרכזי
+            var newTransaction = new Transaction
+            {
+                Amount = amount,
+                Date = TransactionDate,
+                Category = categoryEnum,
+                IsBusiness = IsBusiness, // קובע האם זה עסקי או פרטי (סעיף 2)
+                ReceiptImageUrl = ReceiptImagePath
+            };
+
+            _financialDataService.AddTransaction(newTransaction);
+
+            await Application.Current!.MainPage!.DisplayAlert("Success", "Transaction saved successfully!", "OK");
             await NavigateBack();
         }
 

@@ -7,8 +7,13 @@
     Shell.FlyoutBehavior="Disabled"
     Title="SmartBills">
 
-    <TabBar>
+    <Shell.ToolbarItems>
+        <ToolbarItem Text="Logout" 
+                     Clicked="OnLogoutClicked" 
+                     Priority="0" />
+    </Shell.ToolbarItems>
 
+    <TabBar>
         <Tab Title="Dashboard">
             <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" />
         </Tab>
@@ -28,7 +33,6 @@
         <Tab Title="Account">
             <ShellContent ContentTemplate="{DataTemplate views:AccountView}" />
         </Tab>
-
     </TabBar>
 
 </Shell>

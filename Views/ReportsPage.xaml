@@ -1,7 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+             xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="MyApp_SmartBills.Views.ReportsPage"
-             Title="Reports">
-    <Label Text="Financial Charts Coming Soon" HorizontalOptions="Center" VerticalOptions="Center" />
+             x:DataType="viewmodels:ReportsViewModel"
+             Title="Reports"
+             BackgroundColor="#121212">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20" HorizontalOptions="Fill">
+
+            <Label Text="Monthly Expense Distribution"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalOptions="Center"
+                   Margin="0,10,0,20"/>
+
+            <Border StrokeShape="RoundRectangle 12"
+                    BackgroundColor="#1E1E1E"
+                    Padding="15"
+                    HeightRequest="350"
+                    HorizontalOptions="Fill">
+
+                <microcharts:ChartView Chart="{Binding ExpenseChart}" 
+                                       HorizontalOptions="Fill" 
+                                       VerticalOptions="Fill" />
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
