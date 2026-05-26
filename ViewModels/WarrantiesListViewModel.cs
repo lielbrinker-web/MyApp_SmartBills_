@@ -2,64 +2,108 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Storage;
+using Firebase.Database;
+using Firebase.Database.Query;
 using MyApp_SmartBills.Model;
 
 namespace MyApp_SmartBills.ViewModels
 {
     public class WarrantiesListViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<WarrantyItem> Warranties { get; set; }
+        private readonly FirebaseClient _firebaseClient = new FirebaseClient("https://lielsmartbills-default-rtdb.europe-west1.firebasedatabase.app/");
+
+        private ObservableCollection<WarrantyItem> _warranties;
+        public ObservableCollection<WarrantyItem> Warranties
+        {
+            get => _warranties;
+            set { _warranties = value; OnPropertyChanged(); }
+        }
+
+        private bool _isRefreshing;
+        public bool IsRefreshing
+        {
+            get => _isRefreshing;
+            set { _isRefreshing = value; OnPropertyChanged(); }
+        }
 
         public ICommand NavigateToAddWarrantyCommand { get; }
+        public ICommand RefreshCommand { get; }
+        public ICommand ViewReceiptCommand { get; }
 
         public WarrantiesListViewModel()
         {
             Warranties = new ObservableCollection<WarrantyItem>();
 
-            // פקודה למעבר למסך הוספת אחריות
             NavigateToAddWarrantyCommand = new Command(async () => await NavigateToAddWarranty());
-
-            LoadMockData();
+            RefreshCommand = new Command(async () => await LoadUserWarrantiesAsync());
+            ViewReceiptCommand = new Command<WarrantyItem>(async (item) => await ViewReceiptDetails(item));
         }
 
-        private void LoadMockData()
+        public async Task LoadUserWarrantiesAsync()
         {
-            // נתוני דמה לבדיקת ה-UI והצבעים
-            Warranties.Add(new WarrantyItem
+            IsRefreshing = true;
+            try
             {
-                ProductName = "Samsung Refrigerator",
-                PurchaseDate = DateTime.Today.AddMonths(-11), // נקנה לפני 11 חודשים
-                WarrantyMonths = 12, // אחריות לשנה (נשאר חודש אחד -> יצבע בכתום/אדום)
-                ReceiptImageSource = "receipt_placeholder.png"
-            });
+                string currentUserId = Preferences.Get("UserId", string.Empty);
+                if (string.IsNullOrEmpty(currentUserId))
+                {
+                    currentUserId = "405KLU9dPCN5leIPRw8wdQT0lUT2";
+                }
 
-            Warranties.Add(new WarrantyItem
-            {
-                ProductName = "Apple iPhone 15",
-                PurchaseDate = DateTime.Today.AddMonths(-3),
-                WarrantyMonths = 24, // אחריות לשנתיים (מצב מצוין -> ירוק)
-                ReceiptImageSource = "receipt_placeholder.png"
-            });
+                var firebaseWarranties = await _firebaseClient
+                    .Child("Users")
+                    .Child(currentUserId)
+                    .Child("Warranties")
+                    .OnceAsync<WarrantyItem>();
 
-            Warranties.Add(new WarrantyItem
+                Warranties.Clear();
+
+                foreach (var item in firebaseWarranties)
+                {
+                    var warranty = item.Object;
+                    warranty.Id = item.Key;
+                    Warranties.Add(warranty);
+                }
+            }
+            catch (Exception ex)
             {
-                ProductName = "Dyson Vacuum Cleaner",
-                PurchaseDate = DateTime.Today.AddMonths(-25),
-                WarrantyMonths = 24, // האחריות כבר פגה (פחות מ-0 ימים -> ירוץ באדום)
-                ReceiptImageSource = "receipt_placeholder.png"
-            });
+                System.Diagnostics.Debug.WriteLine($"Error fetching warranties: {ex.Message}");
+            }
+            finally
+            {
+                IsRefreshing = false;
+            }
+        }
+
+        /// <summary>
+        /// ניווט לדף הפירוט המלא במקום פתיחת חלונית טקסט קופצת
+        /// </summary>
+        private async Task ViewReceiptDetails(WarrantyItem item)
+        {
+            if (item == null) return;
+
+            if (Application.Current?.Windows[0].Page is Shell shell)
+            {
+                var detailPage = new Views.WarrantyDetailPage(item);
+
+                // מאזין לאירוע היעלמות הדף כדי לרענן את הרשימה אוטומטית אם המשתמש מחק או ערך
+                detailPage.Disappearing += async (s, e) => await LoadUserWarrantiesAsync();
+
+                await shell.Navigation.PushAsync(detailPage);
+            }
         }
 
         private async Task NavigateToAddWarranty()
         {
-            // מעבר למסך ההוספה (נשתמש בנתיב הרגיל של Shell או Navigation לפי מה שמוגדר אצלך)
-            // אם את משתמשת ב-Shell, זה יהיה: Shell.Current.GoToAsync("AddWarrantyPage");
-            // כרגע נעשה ניווט ישיר דרך ה-Page הנוכחי לטובת הפשטות:
             if (Application.Current?.Windows[0].Page is Shell shell)
             {
-                await shell.Navigation.PushAsync(new Views.AddWarrantyPage());
+                var addPage = new Views.AddWarrantyPage();
+                addPage.Disappearing += async (s, e) => await LoadUserWarrantiesAsync();
+                await shell.Navigation.PushAsync(addPage);
             }
         }
 
