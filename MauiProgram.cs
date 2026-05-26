@@ -28,13 +28,17 @@ namespace MyApp_SmartBills
             builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
+            var app = builder.Build();
+
+            // תיקון קריטי: רישום ה-Route בתוך ה-Shell כדי שכפתור ה-+ Add New Transaction יעביר אותך מסך בהצלחה!
+            Routing.RegisterRoute(nameof(Views.AddEditTransactionPage), typeof(Views.AddEditTransactionPage));
+
+            return app;
         }
 
         // פונקציית הרחבה לרישום כל מסכי הממשק (Views / Pages)
         public static MauiAppBuilder RegisterViews(this MauiAppBuilder builder)
         {
-            // הסרנו מכאן את AppShell כי הוא רשום כ-Singleton ב-Services
             builder.Services.AddTransient<Views.SignInView>();
             builder.Services.AddTransient<Views.SignUpView>();
             builder.Services.AddTransient<Views.MainPageView>();
@@ -46,6 +50,9 @@ namespace MyApp_SmartBills
             builder.Services.AddTransient<Views.TransactionsListPage>();
             builder.Services.AddTransient<Views.WarrantiesListPage>();
             builder.Services.AddTransient<Views.ReportsPage>();
+
+            // תיקון: רישום דף הוספת/עריכת תנועה במערכת הזרקת התלויות
+            builder.Services.AddTransient<Views.AddEditTransactionPage>();
 
             return builder;
         }
@@ -63,9 +70,10 @@ namespace MyApp_SmartBills
 
             builder.Services.AddTransient<ViewModels.DashboardViewModel>();
             builder.Services.AddTransient<ViewModels.ReportsViewModel>();
-
-            // תיקון: העברנו את ה-ViewModel הזה מה-Views לפה, למקומו הטבעי
             builder.Services.AddTransient<ViewModels.TransactionsListViewModel>();
+
+            // תיקון: רישום ה-ViewModel של מסך ההוספה כדי שה-Picker והכפתורים יתעוררו לחיים!
+            builder.Services.AddTransient<ViewModels.AddEditTransactionViewModel>();
 
             return builder;
         }
@@ -73,12 +81,8 @@ namespace MyApp_SmartBills
         // פונקציית הרחבה לרישום שכבת השירותים והגישה לנתונים (Services / Repositories)
         public static MauiAppBuilder RegisterServices(this MauiAppBuilder builder)
         {
-            // רישום ה-AppShell כ-Singleton חובה כדי שהזרקת התלויות בלוגין תעבוד!
             builder.Services.AddSingleton<AppShell>();
-
-            // רישום שירות הנתונים הפיננסיים (פותר סופית את הקריסה בלוגין)
             builder.Services.AddSingleton<IFinancialDataService, FinancialDataService>();
-
             builder.Services.AddSingleton<IAppLogger, LogService>();
             builder.Services.AddSingleton<IAlertService, AlertService>();
             builder.Services.AddSingleton<IAuthService, FirebaseAuthService>();

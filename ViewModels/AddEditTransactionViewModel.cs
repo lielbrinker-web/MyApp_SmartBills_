@@ -1,24 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using MyApp_SmartBills.Model;
-using MyApp_SmartBills.Service; // <--- הוספנו
+using MyApp_SmartBills.Service;
+using MyApp_SmartBills.Service.DBService.FireBase;
 
 namespace MyApp_SmartBills.ViewModels
 {
     public class AddEditTransactionViewModel : INotifyPropertyChanged
     {
-        private readonly IFinancialDataService _financialDataService; // <--- הוספנו
+        private readonly IFinancialDataService _financialDataService;
+        private readonly IAuthService _authService; // הוספת שירות האותנטיקציה עבור ה-UID
+
         private string _amountText = string.Empty;
         private DateTime _transactionDate = DateTime.Today;
         private string _selectedCategory = string.Empty;
         private bool _isBusiness = false;
         private string _receiptImagePath = "receipt_placeholder.png";
+        private bool _isIncome = false; // שדה חדש לבחירה בין הכנסה להוצאה
 
         #region Properties
         public string AmountText
@@ -51,10 +56,15 @@ namespace MyApp_SmartBills.ViewModels
             set { _receiptImagePath = value; OnPropertyChanged(); }
         }
 
-        public List<string> Categories { get; } = new List<string>
+        // פרופרטי חדש שיקושר ל-RadioButton או Switch במסך
+        public bool IsIncome
         {
-            "Electricity", "Water", "Rent", "Salary", "Groceries", "Fuel", "Entertainment", "Other"
-        };
+            get => _isIncome;
+            set { _isIncome = value; OnPropertyChanged(); }
+        }
+
+        // טעינה דינמית של כל הקטגוריות הקיימות ב-Enum שלך
+        public List<string> Categories { get; } = Enum.GetNames(typeof(TransactionCategory)).ToList();
         #endregion
 
         public ICommand PickImageCommand { get; }
@@ -62,10 +72,11 @@ namespace MyApp_SmartBills.ViewModels
         public ICommand SaveTransactionCommand { get; }
         public ICommand CancelCommand { get; }
 
-        // עדכון הבנאי לקבלת השירות
-        public AddEditTransactionViewModel(IFinancialDataService financialDataService)
+        // הזרקת ה-IAuthService בבנאי
+        public AddEditTransactionViewModel(IFinancialDataService financialDataService, IAuthService authService)
         {
             _financialDataService = financialDataService;
+            _authService = authService;
 
             PickImageCommand = new Command(async () => await PickImage());
             TakePhotoCommand = new Command(async () => await TakePhoto());
@@ -110,34 +121,45 @@ namespace MyApp_SmartBills.ViewModels
                 return;
             }
 
-            // המרה של מחרוזת ה-Category ל-Enum המקורי שלך
             if (!Enum.TryParse(SelectedCategory, out TransactionCategory categoryEnum))
             {
                 categoryEnum = TransactionCategory.Other;
             }
 
-            // יצירת האובייקט האמיתי ושמירתו בשירות המרכזי
+            // יצירת אובייקט התנועה המלא
             var newTransaction = new Transaction
             {
+                Id = Guid.NewGuid().ToString(), // יצירת מפתח ייחודי לתנועה הנוכחית
                 Amount = amount,
                 Date = TransactionDate,
                 Category = categoryEnum,
-                IsBusiness = IsBusiness, // קובע האם זה עסקי או פרטי (סעיף 2)
-                ReceiptImageUrl = ReceiptImagePath
+                IsBusiness = IsBusiness,
+                ReceiptImageUrl = ReceiptImagePath,
+
+                // 1. קביעה האם מדובר בהכנסה או הוצאה על בסיס הבחירה במסך
+                Type = IsIncome ? TransactionType.Income : TransactionType.Expense,
+
+                // 2. קישור ישיר ל-UID של המשתמש המחובר כעת
+                UserId = _authService.CurrentUserId ?? "GuestUser"
             };
 
-            _financialDataService.AddTransaction(newTransaction);
+            try
+            {
+                // שמירה אסינכרונית בתוך ה-Realtime Database
+                await _financialDataService.AddTransactionAsync(newTransaction);
 
-            await Application.Current!.MainPage!.DisplayAlert("Success", "Transaction saved successfully!", "OK");
-            await NavigateBack();
+                await Application.Current!.MainPage!.DisplayAlert("Success", "Transaction saved successfully!", "OK");
+                await NavigateBack();
+            }
+            catch (Exception ex)
+            {
+                await Application.Current!.MainPage!.DisplayAlert("Error", $"Failed to save to Firebase: {ex.Message}", "OK");
+            }
         }
 
         private async Task NavigateBack()
         {
-            if (Application.Current?.Windows.Count > 0 && Application.Current.Windows[0].Page is Page currentPage)
-            {
-                await currentPage.Navigation.PopAsync();
-            }
+            await Shell.Current.GoToAsync("..");
         }
 
         #region INotifyPropertyChanged

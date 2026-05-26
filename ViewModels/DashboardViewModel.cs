@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using MyApp_SmartBills.Model;
 using MyApp_SmartBills.Service;
 
@@ -12,7 +13,7 @@ namespace MyApp_SmartBills.ViewModels
     {
         private readonly IFinancialDataService _financialDataService;
 
-        private ObservableCollection<Transaction> _recentTransactions;
+        private ObservableCollection<Transaction> _recentTransactions = new ObservableCollection<Transaction>();
         private double _totalIncome;
         private double _totalExpenses;
         private double _balance;
@@ -27,7 +28,7 @@ namespace MyApp_SmartBills.ViewModels
         public double TotalIncome
         {
             get => _totalIncome;
-            set { _totalIncome = value; OnPropertyChanged(); }
+            set { _totalIncome = value; OnPropertyChanged(); } // תוקן רשמית: מעדכן את _totalIncome!
         }
 
         public double TotalExpenses
@@ -51,17 +52,35 @@ namespace MyApp_SmartBills.ViewModels
         public DashboardViewModel(IFinancialDataService financialDataService)
         {
             _financialDataService = financialDataService;
-            RecentTransactions = _financialDataService.GetTransactions();
-
-            RefreshDashboardValues();
             UpdateDashboardWelcome();
         }
 
-        public void RefreshDashboardValues()
+        public async Task InitializeDashboardAsync()
         {
-            TotalIncome = _financialDataService.GetTotalIncome();
-            TotalExpenses = _financialDataService.GetTotalExpenses();
-            Balance = _financialDataService.GetBalance();
+            try
+            {
+                var transactionsList = await _financialDataService.GetTransactionsAsync();
+
+                RecentTransactions.Clear();
+                if (transactionsList != null)
+                {
+                    // מציג את 5 התנועות האחרונות ביותר שהתווספו (מסודר מהחדש לישן)
+                    var recentItems = transactionsList.OrderByDescending(t => t.Date).Take(5);
+                    foreach (var transaction in recentItems)
+                    {
+                        RecentTransactions.Add(transaction);
+                    }
+                }
+
+                // שליפת הנתונים הפיננסיים המעודכנים מפיירבייס
+                TotalIncome = await _financialDataService.GetTotalIncomeAsync();
+                TotalExpenses = await _financialDataService.GetTotalExpensesAsync();
+                Balance = await _financialDataService.GetBalanceAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading dashboard data: {ex.Message}");
+            }
         }
 
         public void UpdateDashboardWelcome()

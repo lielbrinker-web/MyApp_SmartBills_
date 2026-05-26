@@ -13,6 +13,9 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
         private FirebaseAuthClient? _authClient;
         private IAppLogger _logger;
 
+        // תיקון: מימוש ה-Property מהאינטרפייס החדש
+        public string CurrentUserId { get; private set; }
+
         public FirebaseAuthService(IAppLogger logger)
         {
             _logger = logger;
@@ -26,7 +29,6 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                     {
                         new EmailProvider()
                     },
-                //UserRepository = new FileUserRepository("AppCurrentUser") //Save login status localy
             };
             _authClient = new FirebaseAuthClient(config);
             _logger = logger;
@@ -38,13 +40,17 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
             try
             {
                 await _authClient!.SignInWithEmailAndPasswordAsync(userEmail, userPassword);
-                return _authClient.User.Info.Uid;
+
+                // תיקון: שמירת ה-UID הנוכחי בשדה הציבורי של השירות
+                CurrentUserId = _authClient.User.Info.Uid;
+
+                return CurrentUserId;
             }
             catch (FirebaseAuthException ex)
             {
                 if (ex.Message.Contains("INVALID_LOGIN_CREDENTIALS"))
                 {
-                    errorMessage = "Incorrect email or password!"; //"אימייל או סיסמה אינם נכונים";
+                    errorMessage = "Incorrect email or password!";
                     _logger.LogDebug($" SignInAuth failed: {userEmail} {userPassword}, {errorMessage}");
                 }
                 else
@@ -59,21 +65,25 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 _logger.LogDebug($"SignInAuth failed: {userEmail} {userPassword}, {ex.Message}");
                 throw new Exception("SignIn failed!");
             }
-
         }
+
         public async Task<string> CreateAuth(string userEmail, string userPassword)
         {
             try
             {
                 await _authClient!.CreateUserWithEmailAndPasswordAsync(userEmail, userPassword);
                 _logger.LogDebug($"AppUser Auth {userEmail} created successfully");
-                return _authClient.User.Uid;
+
+                // תיקון: שמירת ה-UID גם בזמן רישום משתמש חדש
+                CurrentUserId = _authClient.User.Uid;
+
+                return CurrentUserId;
             }
             catch (FirebaseAuthException ex)
             {
                 string errorMessage = string.Empty;
 
-                if (ex.Message.Contains("INVALID_EMAIL")) //Email failed validation - not real email
+                if (ex.Message.Contains("INVALID_EMAIL"))
                 {
                     errorMessage = "Invalid email adress!";
                 }
@@ -88,19 +98,6 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
 
                 _logger.LogDebug($"CreateUserAuth failed: {ex.Message}");
                 throw new Exception(errorMessage);
-
-                //// Exception reason
-                //AuthErrorReason reason = ex.Reason;
-
-                //string errorMessage = reason switch
-                //{
-                //	AuthErrorReason.InvalidEmailAddress => "Error: Incorrect email adress", // "כתובת האימייל לא תקינה",
-                //	AuthErrorReason.WrongPassword => "Error: Incorrect password", // "סיסמה שגויה",					
-                //	AuthErrorReason.EmailExists => "Error: This email allready exist", //"האימייל כבר רשום במערכת",
-                //	_ => "Error: Unknown exception" // "אירעה שגיאה לא ידועה"
-                //};
-
-                //_appLogger.LogDebug($"Firebase Auth creation failed: {errorMessage}");				
             }
             catch (Exception ex)
             {
@@ -108,15 +105,13 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
                 return "SignUp new user failed!";
             }
         }
+
         public async Task RemoveAuth(string userEmail, string userPassword)
         {
             try
             {
-                //1 Authenticate the user to be deleted
                 await _authClient!.SignInWithEmailAndPasswordAsync(userEmail, userPassword);
-                //2 Delete the authenticated user
                 await _authClient.User.DeleteAsync();
-                //3 Re-authenticate the previous logged in user
                 await _authClient!.SignInWithEmailAndPasswordAsync(
                     (App.Current as App)!.CurrentUser!.UserEmail,
                     (App.Current as App)!.CurrentUser!.UserPassword);
@@ -132,7 +127,13 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
 
         public async Task SignOut()
         {
-            throw new NotImplementedException();
+            // תיקון: מימוש פונקציית הניתוק במקום זריקת שגיאה + איפוס ה-UID
+            if (_authClient != null)
+            {
+                _authClient.SignOut();
+            }
+            CurrentUserId = null;
+            await Task.CompletedTask;
         }
     }
 }

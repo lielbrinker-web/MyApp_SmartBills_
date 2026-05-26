@@ -10,6 +10,16 @@
     <ScrollView Padding="20">
         <VerticalStackLayout Spacing="18">
 
+            <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="15,10" BackgroundColor="White">
+                <Grid ColumnDefinitions="*, Auto">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="Is this an Income?" FontAttributes="Bold" TextColor="#2C3E50"/>
+                        <Label Text="Turn ON for Income, Turn OFF for Expense" FontSize="12" TextColor="#7F8C8D"/>
+                    </VerticalStackLayout>
+                    <Switch Grid.Column="1" IsToggled="{Binding IsIncome}" OnColor="#2ECC71" />
+                </Grid>
+            </Border>
+
             <VerticalStackLayout Spacing="5">
                 <Label Text="Amount ($) *" TextColor="#2C3E50" FontAttributes="Bold" />
                 <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="10,0" HeightRequest="50" BackgroundColor="White">
@@ -33,7 +43,7 @@
                 </Border>
             </VerticalStackLayout>
 
-            <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="15,10" BackgroundColor="White" Margin="0,5">
+            <Border Stroke="#BDC3C7" StrokeShape="RoundRectangle 8" Padding="15,10" BackgroundColor="White">
                 <Grid ColumnDefinitions="*, Auto">
                     <VerticalStackLayout Grid.Column="0" Spacing="2">
                         <Label Text="Is Business Expense?" FontAttributes="Bold" TextColor="#2C3E50"/>

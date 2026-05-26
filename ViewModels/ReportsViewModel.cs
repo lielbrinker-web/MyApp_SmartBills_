@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks; // הוסף כדי לתמוך ב-Task
 using Microcharts;
 using SkiaSharp;
 using MyApp_SmartBills.Service;
@@ -9,7 +10,6 @@ using MyApp_SmartBills.Model;
 
 namespace MyApp_SmartBills.ViewModels
 {
-    // החזרנו את ה-partial כדי לפתור את שגיאת הקומפילציה CS0260
     public partial class ReportsViewModel : INotifyPropertyChanged
     {
         private readonly IFinancialDataService _financialDataService;
@@ -28,37 +28,56 @@ namespace MyApp_SmartBills.ViewModels
         public ReportsViewModel(IFinancialDataService financialDataService)
         {
             _financialDataService = financialDataService;
-            LoadDynamicChartData();
+
+            // מחקנו מכאן את הזימון הישיר של הגרף, כי הבנאי לא יכול להמתין (await) לנתונים מהרשת.
+            // הטעינה תתבצע ברגע שהמסך נפתח.
         }
 
-        public void LoadDynamicChartData()
+        // שינוי ל-async Task כדי לאפשר עבודה מול פיירבייס בצורה תקינה
+        public async Task LoadDynamicChartDataAsync()
         {
-            var expenses = _financialDataService.GetTransactions()
-                .Where(t => t.Type == TransactionType.Expense);
-
-            if (!expenses.Any())
+            try
             {
-                ExpenseChart = new DonutChart { Entries = Array.Empty<ChartEntry>() };
-                return;
-            }
+                // קריאה אסינכרונית עם await לשירות המעודכן
+                var allTransactions = await _financialDataService.GetTransactionsAsync();
 
-            var entries = expenses
-                .GroupBy(t => t.Category)
-                .Select(group => new ChartEntry((float)group.Sum(t => t.Amount))
+                if (allTransactions == null)
                 {
-                    Label = group.Key.ToString(),
-                    ValueLabel = $"${group.Sum(t => t.Amount):N0}",
-                    Color = SKColor.Parse(GetCategoryColor(group.Key))
-                }).ToArray();
+                    ExpenseChart = new DonutChart { Entries = Array.Empty<ChartEntry>() };
+                    return;
+                }
 
-            ExpenseChart = new DonutChart
+                // סינון ההוצאות מתוך האוסף שהתקבל
+                var expenses = allTransactions.Where(t => t.Type == TransactionType.Expense);
+
+                if (!expenses.Any())
+                {
+                    ExpenseChart = new DonutChart { Entries = Array.Empty<ChartEntry>() };
+                    return;
+                }
+
+                var entries = expenses
+                    .GroupBy(t => t.Category)
+                    .Select(group => new ChartEntry((float)group.Sum(t => t.Amount))
+                    {
+                        Label = group.Key.ToString(),
+                        ValueLabel = $"${group.Sum(t => t.Amount):N0}",
+                        Color = SKColor.Parse(GetCategoryColor(group.Key))
+                    }).ToArray();
+
+                ExpenseChart = new DonutChart
+                {
+                    Entries = entries,
+                    LabelTextSize = 14f,
+                    Typeface = SKTypeface.FromFamilyName("Arial"),
+                    HoleRadius = 0.4f,
+                    LabelColor = SKColors.Black
+                };
+            }
+            catch (Exception ex)
             {
-                Entries = entries,
-                LabelTextSize = 14f,
-                Typeface = SKTypeface.FromFamilyName("Arial"),
-                HoleRadius = 0.4f,
-                LabelColor = SKColors.Black
-            };
+                System.Diagnostics.Debug.WriteLine($"Error building charts: {ex.Message}");
+            }
         }
 
         private string GetCategoryColor(TransactionCategory category)

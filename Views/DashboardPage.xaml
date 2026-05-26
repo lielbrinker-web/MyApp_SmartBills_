@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-   x:Class="MyApp_SmartBills.Views.DashboardPage"
+    x:Class="MyApp_SmartBills.Views.DashboardPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
-    x:DataType="viewmodels:DashboardViewModel"
     Title="Dashboard">
 
     <ScrollView>
@@ -14,7 +12,7 @@
                    FontSize="24" 
                    FontAttributes="Bold" 
                    TextColor="#2C3E50" 
-                   HorizontalOptions="Center" />    
+                   HorizontalOptions="Center" />
 
             <Border BackgroundColor="#2ECC71" Stroke="Transparent" Padding="20">
                 <Border.StrokeShape>
@@ -31,14 +29,13 @@
             </Border>
 
             <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
-
                 <Border Grid.Column="0" BackgroundColor="White" Stroke="#E2E8F0" Padding="15">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="12"/>
                     </Border.StrokeShape>
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Income" TextColor="#7F8C8D" FontSize="12" />
-                        <Label Text="{Binding TotalIncome, StringFormat='${0:N0}'}" TextColor="#27AE60" FontSize="18" FontAttributes="Bold" />
+                        <Label Text="{Binding TotalIncome, StringFormat='${0:N2}'}" TextColor="#27AE60" FontSize="18" FontAttributes="Bold" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -48,7 +45,7 @@
                     </Border.StrokeShape>
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Expenses" TextColor="#7F8C8D" FontSize="12" />
-                        <Label Text="{Binding TotalExpenses, StringFormat='${0:N0}'}" TextColor="#C0392B" FontSize="18" FontAttributes="Bold" />
+                        <Label Text="{Binding TotalExpenses, StringFormat='${0:N2}'}" TextColor="#C0392B" FontSize="18" FontAttributes="Bold" />
                     </VerticalStackLayout>
                 </Border>
             </Grid>
@@ -62,29 +59,47 @@
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="10"/>
                             </Border.StrokeShape>
-                            <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
+                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
 
-                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Margin="0,0,15,0">
-                                    <Label Text="{Binding Category}" FontAttributes="Bold" FontSize="14" TextColor="#34495E" />
-                                    <Label Text="{Binding Date, StringFormat='{0:MM/dd/yyyy}'}" FontSize="11" TextColor="#95A5A6" />
+                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="4">
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="15" TextColor="#2C3E50" />
+
+                                    <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                                        <Label Text="{Binding Category}" FontSize="12" TextColor="#7F8C8D" />
+                                        <Label Text="•" FontSize="11" TextColor="#95A5A6"/>
+                                        <Label Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" FontSize="11" TextColor="#95A5A6" />
+                                        <Label Text="•" FontSize="11" TextColor="#95A5A6"/>
+
+                                        <Label FontSize="11" FontAttributes="Bold">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsBusiness}" Value="True">
+                                                    <Setter Property="Text" Value="Business"/>
+                                                    <Setter Property="TextColor" Value="#2ECC71"/>
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsBusiness}" Value="False">
+                                                    <Setter Property="Text" Value="Personal"/>
+                                                    <Setter Property="TextColor" Value="#7F8C8D"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </HorizontalStackLayout>
                                 </VerticalStackLayout>
 
-                                <Label Grid.Column="1" Text="{Binding Notes}" TextColor="#7F8C8D" FontSize="13" VerticalOptions="Center" LineBreakMode="TailTruncation" />
-
-                                <Label Grid.Column="2" Text="{Binding Amount, StringFormat='${0:N0}'}" FontAttributes="Bold" FontSize="16" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="{Binding Amount, StringFormat='${0:N2}'}" FontAttributes="Bold" FontSize="16" VerticalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsIncome}" Value="True">
+                                            <Setter Property="TextColor" Value="#2ECC71"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsIncome}" Value="False">
+                                            <Setter Property="TextColor" Value="#E74C3C"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-
-            <Button Text="+ Add New Transaction"
-                    BackgroundColor="#2980B9"
-                    TextColor="White"
-                    FontAttributes="Bold"
-                    HeightRequest="50"
-                    CornerRadius="25"
-                    Margin="0,15,0,0" />
 
         </VerticalStackLayout>
     </ScrollView>

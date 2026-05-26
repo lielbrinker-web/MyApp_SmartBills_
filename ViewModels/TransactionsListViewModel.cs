@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using MyApp_SmartBills.Model;
+using MyApp_SmartBills.Service; // ודא שקיים עבור השירות
 
 namespace MyApp_SmartBills.ViewModels
 {
     public class TransactionsListViewModel : INotifyPropertyChanged
     {
+        private readonly IFinancialDataService _financialDataService;
         private List<Transaction> _allTransactions = new List<Transaction>();
         private string _selectedFilter = "All";
         private string _selectedMonth = "All Months";
@@ -34,8 +36,10 @@ namespace MyApp_SmartBills.ViewModels
         public ICommand FilterChangedCommand { get; }
         public ICommand NavigateToAddTransactionCommand { get; }
 
-        public TransactionsListViewModel()
+        // הזרקת שירות הנתונים הפיננסיים בבנאי
+        public TransactionsListViewModel(IFinancialDataService financialDataService)
         {
+            _financialDataService = financialDataService;
             FilteredTransactions = new ObservableCollection<Transaction>();
 
             FilterChangedCommand = new Command<string>((filterType) =>
@@ -45,23 +49,23 @@ namespace MyApp_SmartBills.ViewModels
             });
 
             NavigateToAddTransactionCommand = new Command(async () => await NavigateToAddTransaction());
-
-            LoadMockTransactions();
         }
 
-        private void LoadMockTransactions()
+        // מתודה אסינכרונית חדשה שמחליפה את נתוני הדמה בנתונים חיים מפיירבייס
+        public async Task LoadUserTransactionsAsync()
         {
-            // תיקון מוחלט: שימוש ב-Category הקיים במודל שלך במקום Description או Title
-            _allTransactions = new List<Transaction>
+            try
             {
-               new Transaction { Id = "1", Category = TransactionCategory.Rent, Amount = 1500, IsBusiness = true, Date = DateTime.Today },
-               new Transaction { Id = "2", Category = TransactionCategory.Food, Amount = 320, IsBusiness = false, Date = DateTime.Today.AddDays(-1) },
-                new Transaction { Id = "3", Category = TransactionCategory.Salary, Amount = 4500, IsBusiness = true, Date = DateTime.Today.AddDays(-2) },
-                new Transaction { Id = "4", Category = TransactionCategory.Electricity, Amount = 85, IsBusiness = false, Date = DateTime.Today.AddDays(-3) },
-                new Transaction { Id = "5", Category = TransactionCategory.Other, Amount = 120.50, IsBusiness = false, Date = DateTime.Today.AddDays(-4) }
-            };
+                var liveList = await _financialDataService.GetTransactionsAsync();
+                _allTransactions = liveList != null ? liveList.ToList() : new List<Transaction>();
 
-            ApplyFilters();
+                // הפעלת הסינון המובנה על המידע האמיתי שחזר
+                ApplyFilters();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error fetching history: {ex.Message}");
+            }
         }
 
         private void ApplyFilters()
@@ -78,7 +82,8 @@ namespace MyApp_SmartBills.ViewModels
             }
 
             FilteredTransactions.Clear();
-            foreach (var item in result)
+            // מיון מהחדש ביותר לישן ביותר בהיסטוריית התנועות
+            foreach (var item in result.OrderByDescending(t => t.Date))
             {
                 FilteredTransactions.Add(item);
             }
@@ -86,10 +91,7 @@ namespace MyApp_SmartBills.ViewModels
 
         private async Task NavigateToAddTransaction()
         {
-            if (Application.Current?.Windows.Count > 0 && Application.Current.Windows[0].Page is Page currentPage)
-            {
-                await currentPage.Navigation.PushAsync(new Views.AddEditTransactionPage());
-            }
+            await Shell.Current.GoToAsync(nameof(Views.AddEditTransactionPage));
         }
 
         #region INotifyPropertyChanged

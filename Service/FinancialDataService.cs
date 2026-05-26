@@ -1,38 +1,71 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using Firebase.Database;
+using Firebase.Database.Query;
 using MyApp_SmartBills.Model;
+using MyApp_SmartBills.Service.DBService.FireBase;
 
 namespace MyApp_SmartBills.Service
 {
     public interface IFinancialDataService
     {
-        ObservableCollection<Transaction> GetTransactions();
-        void AddTransaction(Transaction transaction);
-        ObservableCollection<WarrantyItem> GetWarranties();
-        void AddWarranty(WarrantyItem warranty);
-        double GetTotalIncome();
-        double GetTotalExpenses();
-        double GetBalance();
+        Task<ObservableCollection<Transaction>> GetTransactionsAsync();
+        Task AddTransactionAsync(Transaction transaction);
+        Task<ObservableCollection<WarrantyItem>> GetWarrantiesAsync();
+        Task AddWarrantyAsync(WarrantyItem warranty);
+        Task<double> GetTotalIncomeAsync();
+        Task<double> GetTotalExpensesAsync();
+        Task<double> GetBalanceAsync();
     }
 
     public class FinancialDataService : IFinancialDataService
     {
-        private readonly ObservableCollection<Transaction> _transactions;
-        private readonly ObservableCollection<WarrantyItem> _warranties;
+        private readonly FirebaseClient _firebaseClient;
+        private readonly IAuthService _authService;
 
-        public FinancialDataService()
+        public FinancialDataService(IAuthService authService)
         {
-            _transactions = new ObservableCollection<Transaction>();
-            _warranties = new ObservableCollection<WarrantyItem>();
-            LoadInitialData();
+            _authService = authService;
+            _firebaseClient = new FirebaseClient("https://lielsmartbills-default-rtdb.europe-west1.firebasedatabase.app/");
         }
 
-        public ObservableCollection<Transaction> GetTransactions() => _transactions;
-
-        public void AddTransaction(Transaction transaction)
+        // התיקון נמצא כאן: קריאה ישירה לשדה המחרוזת שקיים ב-IAuthService
+        private string GetCurrentUserId()
         {
-            // סעיף 3: זיהוי אוטומטי של סוג התנועה לפי הקטגוריה
+            return _authService.CurrentUserId ?? throw new Exception("User must be logged in.");
+        }
+
+        public async Task<ObservableCollection<Transaction>> GetTransactionsAsync()
+        {
+            try
+            {
+                string userId = GetCurrentUserId();
+
+                var firebaseData = await _firebaseClient
+                    .Child("Users")
+                    .Child(userId)
+                    .Child("Transactions")
+                    .OnceAsync<Transaction>();
+
+                var transactionsList = firebaseData
+                    .Select(item => item.Object)
+                    .OrderByDescending(t => t.Date)
+                    .ToList();
+
+                return new ObservableCollection<Transaction>(transactionsList);
+            }
+            catch (Exception)
+            {
+                return new ObservableCollection<Transaction>();
+            }
+        }
+
+        public async Task AddTransactionAsync(Transaction transaction)
+        {
+            string userId = GetCurrentUserId();
+
             if (transaction.Category == TransactionCategory.Salary)
             {
                 transaction.Type = TransactionType.Income;
@@ -42,27 +75,62 @@ namespace MyApp_SmartBills.Service
                 transaction.Type = TransactionType.Expense;
             }
 
-            // הוספה לראש הרשימה
-            _transactions.Insert(0, transaction);
+            await _firebaseClient
+                .Child("Users")
+                .Child(userId)
+                .Child("Transactions")
+                .PostAsync(transaction);
         }
 
-        public ObservableCollection<WarrantyItem> GetWarranties() => _warranties;
-
-        public void AddWarranty(WarrantyItem warranty)
+        public async Task<ObservableCollection<WarrantyItem>> GetWarrantiesAsync()
         {
-            _warranties.Insert(0, warranty);
+            try
+            {
+                string userId = GetCurrentUserId();
+                var firebaseData = await _firebaseClient
+                    .Child("Users")
+                    .Child(userId)
+                    .Child("Warranties")
+                    .OnceAsync<WarrantyItem>();
+
+                var warrantiesList = firebaseData.Select(item => item.Object).ToList();
+                return new ObservableCollection<WarrantyItem>(warrantiesList);
+            }
+            catch (Exception)
+            {
+                return new ObservableCollection<WarrantyItem>();
+            }
         }
 
-        public double GetTotalIncome() => _transactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
-        public double GetTotalExpenses() => _transactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
-        public double GetBalance() => GetTotalIncome() - GetTotalExpenses();
-
-        private void LoadInitialData()
+        public async Task AddWarrantyAsync(WarrantyItem warranty)
         {
-            // נתוני ברירת מחדל ראשוניים כדי שהמסכים לא יהיו ריקים לגמרי בהתחלה
-            _transactions.Add(new Transaction { Amount = 6200, Category = TransactionCategory.Salary, Type = TransactionType.Income, Notes = "Monthly Salary", IsBusiness = false });
-            _transactions.Add(new Transaction { Amount = 450, Category = TransactionCategory.Food, Type = TransactionType.Expense, Notes = "Weekly grocery shopping", IsBusiness = false });
-            _transactions.Add(new Transaction { Amount = 120, Category = TransactionCategory.Entertainment, Type = TransactionType.Expense, Notes = "Movie night", IsBusiness = false });
+            string userId = GetCurrentUserId();
+
+            await _firebaseClient
+                .Child("Users")
+                .Child(userId)
+                .Child("Warranties")
+                .PostAsync(warranty);
+        }
+
+        public async Task<double> GetTotalIncomeAsync()
+        {
+            var transactions = await GetTransactionsAsync();
+            return transactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
+        }
+
+        public async Task<double> GetTotalExpensesAsync()
+        {
+            var transactions = await GetTransactionsAsync();
+            return transactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
+        }
+
+        public async Task<double> GetBalanceAsync()
+        {
+            var transactions = await GetTransactionsAsync();
+            double income = transactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
+            double expenses = transactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
+            return income - expenses;
         }
     }
 }

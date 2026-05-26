@@ -8,9 +8,11 @@ namespace MyApp_SmartBills.Service.DBService.FireBase
 {
     public interface IAuthService
     {
+        string CurrentUserId { get; }
         Task<string> SignIn(string usreEmail, string userPassword);
         Task<string> CreateAuth(string email, string password);
         Task RemoveAuth(string email, string password);
+
         Task SignOut();
     }
 }
