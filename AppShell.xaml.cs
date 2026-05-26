@@ -15,9 +15,27 @@ namespace MyApp_SmartBills
             Routing.RegisterRoute(nameof(SignUpView), typeof(SignUpView));
             Routing.RegisterRoute(nameof(Views.AddEditTransactionPage), typeof(Views.AddEditTransactionPage));
 
-            // רישום מפורש של הניווט - זה פותר את שגיאת ה-unable to figure out route!
+            // רישום מפורש של הניווט
             Routing.RegisterRoute("UserListView", typeof(UserListView));
             Routing.RegisterRoute("AccountView", typeof(AccountView));
+            Routing.RegisterRoute(nameof(AccountView), typeof(AccountView));
+
+            // פתרון הניווט האוטומטי: מאזינים לכל לחיצה על הטאבים והתפריטים של ה-Shell
+            this.Navigating += OnShellNavigating;
+        }
+
+        private async void OnShellNavigating(object sender, ShellNavigatingEventArgs e)
+        {
+            // בדיקה: אם המשתמש לוחץ על הטאב שמוביל לאזור האדמין, והוא כרגע נמצא בתוך עריכת משתמש
+            if (e.Target.Location.OriginalString.Contains("AdminView") &&
+                Shell.Current.CurrentPage is AccountView)
+            {
+                // 1. מבטלים את הניווט הרגיל כדי שלא יטען את אותו הדף שוב
+                e.Cancel();
+
+                // 2. מקפיצים אותו ישירות לדף רשימת המשתמשים
+                await Shell.Current.GoToAsync("UserListView");
+            }
         }
 
         private async void OnLogoutClicked(object sender, EventArgs e)

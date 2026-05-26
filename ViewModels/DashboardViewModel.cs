@@ -60,6 +60,9 @@ namespace MyApp_SmartBills.ViewModels
         {
             try
             {
+                // קריאה לרענון שם המשתמש בכל פעם שהדאשבורד מאותחל או עולה מחדש
+                UpdateDashboardWelcome();
+
                 var transactionsList = await _financialDataService.GetTransactionsAsync();
 
                 RecentTransactions.Clear();
@@ -86,15 +89,24 @@ namespace MyApp_SmartBills.ViewModels
         {
             if (Application.Current is App currentApp && currentApp.CurrentUser != null)
             {
-                // פתרון עוקף שגיאה: שימוש בבדיקת אדמין מובנית
                 if (currentApp.CurrentUser.IsAdmin)
                 {
                     WelcomeTitle = "Hello Admin";
                 }
                 else
                 {
-                    // ננסה לקחת תיאור טקסטואלי או שנציג כותרת כללית בטוחה שלא מפילה קומפילציה
-                    WelcomeTitle = "Hello User";
+                    // תיקון: שליפת השם הפרטי ושם המשפחה האמיתיים של המשתמש המחובר מהאפליקציה
+                    string firstName = currentApp.CurrentUser.FirstName;
+                    string lastName = currentApp.CurrentUser.LastName;
+
+                    if (!string.IsNullOrWhiteSpace(firstName))
+                    {
+                        WelcomeTitle = $"Hello {firstName} {lastName}".Trim();
+                    }
+                    else
+                    {
+                        WelcomeTitle = "Hello User";
+                    }
                 }
             }
             else
