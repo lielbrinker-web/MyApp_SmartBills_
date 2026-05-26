@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Firebase.Database;
@@ -18,6 +19,12 @@ namespace MyApp_SmartBills.Service
         Task<double> GetTotalIncomeAsync();
         Task<double> GetTotalExpensesAsync();
         Task<double> GetBalanceAsync();
+
+        // פונקציות הפרופיל התואמות בדיוק למה שה-ViewModel שלך מחפש
+        Task<Dictionary<string, string>> GetCurrentUserProfileAsync();
+        Task<bool> UpdateUserProfileAsync(string fullName, string phoneNumber, string imageBase64);
+        Task<Dictionary<string, string>> GetCurrentUserProfileAsync(string userId); // תמיכה במזהה ישיר
+        Task<bool> UpdateUserProfileAsync(string userId, string fullName, string phoneNumber, string imageBase64);
     }
 
     public class FinancialDataService : IFinancialDataService
@@ -31,11 +38,84 @@ namespace MyApp_SmartBills.Service
             _firebaseClient = new FirebaseClient("https://lielsmartbills-default-rtdb.europe-west1.firebasedatabase.app/");
         }
 
-        // התיקון נמצא כאן: קריאה ישירה לשדה המחרוזת שקיים ב-IAuthService
         private string GetCurrentUserId()
         {
             return _authService.CurrentUserId ?? throw new Exception("User must be logged in.");
         }
+
+        // --- ניהול פרופיל משתמש מול פיירבייס ---
+
+        public async Task<Dictionary<string, string>> GetCurrentUserProfileAsync()
+        {
+            return await GetCurrentUserProfileAsync(GetCurrentUserId());
+        }
+
+        public async Task<Dictionary<string, string>> GetCurrentUserProfileAsync(string userId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId)) return GetEmptyProfile();
+
+                var nameData = await _firebaseClient.Child("Users").Child(userId).Child("FullName").OnceSingleAsync<string>();
+                var phoneData = await _firebaseClient.Child("Users").Child(userId).Child("PhoneNumber").OnceSingleAsync<string>();
+                var imageData = await _firebaseClient.Child("Users").Child(userId).Child("ImageBase64").OnceSingleAsync<string>();
+                var emailData = await _firebaseClient.Child("Users").Child(userId).Child("Email").OnceSingleAsync<string>();
+
+                return new Dictionary<string, string>
+                {
+                    { "FullName", nameData ?? "" },
+                    { "PhoneNumber", phoneData ?? "" },
+                    { "ImageBase64", imageData ?? "" },
+                    { "Email", emailData ?? "" }
+                };
+            }
+            catch (Exception)
+            {
+                return GetEmptyProfile();
+            }
+        }
+
+        public async Task<bool> UpdateUserProfileAsync(string fullName, string phoneNumber, string imageBase64)
+        {
+            return await UpdateUserProfileAsync(GetCurrentUserId(), fullName, phoneNumber, imageBase64);
+        }
+
+        public async Task<bool> UpdateUserProfileAsync(string userId, string fullName, string phoneNumber, string imageBase64)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId)) return false;
+
+                // תיקון קריטי: עטיפת מחרוזות פשוטות במירכאות כדי שפיירבייס יקבל אותן כ-JSON תקין
+                await _firebaseClient.Child("Users").Child(userId).Child("FullName").PutAsync($"\"{fullName}\"");
+                await _firebaseClient.Child("Users").Child(userId).Child("PhoneNumber").PutAsync($"\"{phoneNumber}\"");
+
+                if (!string.IsNullOrEmpty(imageBase64))
+                {
+                    await _firebaseClient.Child("Users").Child(userId).Child("ImageBase64").PutAsync($"\"{imageBase64}\"");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Firebase Update Error: {ex.Message}");
+                return false;
+            }
+        }
+
+        private Dictionary<string, string> GetEmptyProfile()
+        {
+            return new Dictionary<string, string>
+            {
+                { "FullName", "" },
+                { "PhoneNumber", "" },
+                { "ImageBase64", "" },
+                { "Email", "" }
+            };
+        }
+
+        // --- ניהול תנועות (Transactions) ---
 
         public async Task<ObservableCollection<Transaction>> GetTransactionsAsync()
         {
@@ -82,6 +162,8 @@ namespace MyApp_SmartBills.Service
                 .PostAsync(transaction);
         }
 
+        // --- ניהול אחריות (Warranties) ---
+
         public async Task<ObservableCollection<WarrantyItem>> GetWarrantiesAsync()
         {
             try
@@ -112,6 +194,8 @@ namespace MyApp_SmartBills.Service
                 .Child("Warranties")
                 .PostAsync(warranty);
         }
+
+        // --- חישובים וסיכומים ---
 
         public async Task<double> GetTotalIncomeAsync()
         {

@@ -71,7 +71,7 @@ namespace MyApp_SmartBills.ViewModels
                     LabelTextSize = 14f,
                     Typeface = SKTypeface.FromFamilyName("Arial"),
                     HoleRadius = 0.4f,
-                    LabelColor = SKColors.Black
+                    LabelColor = SKColors.White // שונה לשילוב מושלם עם הרקע הכהה של הדף
                 };
             }
             catch (Exception ex)

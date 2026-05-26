@@ -3,39 +3,34 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Maui.Controls;
 
-namespace MyApp_SmartBills.Converters
+namespace MyApp_SmartBills.Converters // ודאי שה-Namespace מתאים לתיקייה שלו
 {
     public class Base64ToImageConverter : IValueConverter
     {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is string base64String && !string.IsNullOrWhiteSpace(base64String))
             {
-                // אם מדובר בטקסט הדיפולטיבי או ריק, נחזיר את תמונת הפלייסהולדר
-                if (base64String == "receipt_placeholder.png")
-                {
-                    return ImageSource.FromFile("receipt_placeholder.png");
-                }
-
                 try
                 {
-                    // המרת מחרוזת הטקסט חזרה למערך בייטים
-                    byte[] imageBytes = System.Convert.FromBase64String(base64String);
+                    // אם המחרוזת מכילה כבר את ה-Header של ה-Data URL, ננקה אותו
+                    if (base64String.Contains(","))
+                    {
+                        base64String = base64String.Split(',')[1];
+                    }
 
-                    // יצירת מקור תמונה מתוך זרם הזיכרון
+                    byte[] imageBytes = System.Convert.FromBase64String(base64String);
                     return ImageSource.FromStream(() => new MemoryStream(imageBytes));
                 }
-                catch (Exception ex)
+                catch
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error converting Base64 to Image: {ex.Message}");
+                    return "user_icon.png"; // תמונת ברירת מחדל במקרה של שגיאה בהמרה
                 }
             }
-
-            // ברירת מחדל אם אין תמונה תקנית
-            return ImageSource.FromFile("receipt_placeholder.png");
+            return "user_icon.png";
         }
 
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

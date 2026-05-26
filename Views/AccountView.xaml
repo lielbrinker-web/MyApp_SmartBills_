@@ -4,9 +4,16 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+    xmlns:converters="clr-namespace:MyApp_SmartBills.Converters"
     Title="Account Management"
     x:DataType="viewmodels:AccountViewModel"
     FlowDirection="LeftToRight">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Converters.Base64ToImageConverter x:Key="Base64ToImageConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <ContentPage.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -49,11 +56,17 @@
                     </Border.StrokeShape>
 
                     <ImageButton
-                        Source="{Binding UserImageSource, TargetNullValue='user_icon.png'}"
+                        Source="{Binding UserImageSource, Converter={StaticResource Base64ToImageConverter}}"
                         Aspect="AspectFill"
                         Command="{Binding ChangeImageCommand}"
-                        HeightRequest="130"
-                        WidthRequest="130" />
+                        HeightRequest="124"
+                        WidthRequest="124"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center">
+                        <ImageButton.Clip>
+                            <EllipseGeometry Center="62,62" RadiusX="62" RadiusY="62" />
+                        </ImageButton.Clip>
+                    </ImageButton>
                 </Border>
 
                 <Label Text="Edit Photo" 
@@ -131,5 +144,4 @@
             </VerticalStackLayout>
         </Grid>
     </Grid>
-
 </ContentPage>

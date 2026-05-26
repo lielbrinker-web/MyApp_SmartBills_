@@ -1,229 +1,172 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MyApp_SmartBills.Helper;
-using MyApp_SmartBills.Model;
 using MyApp_SmartBills.Service;
-using MyApp_SmartBills.Service.DBService;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace MyApp_SmartBills.ViewModels
 {
-    public partial class AccountViewModel : ObservableObject, IQueryAttributable
+    public partial class AccountViewModel : ObservableObject
     {
-        IAlertService _alertService;
-        private readonly IAppUserRepository _dbService;
-
-        #region Fields
-        [ObservableProperty]
-        private string _firstName;
+        private readonly IFinancialDataService _dataService;
 
         [ObservableProperty]
-        private string _lastName;
+        private string fullName;
 
         [ObservableProperty]
-        private string _userEmail;
+        private string userEmail;
 
         [ObservableProperty]
-        private string _userMobile;
+        private string phoneNumber;
 
         [ObservableProperty]
-        private AppUser _recievedUser; // Used to receive user details from the UsersListPage
+        private string userImageSource;
 
         [ObservableProperty]
-        private bool _isDeleteButtonVisible;
+        private string errorMessage;
 
         [ObservableProperty]
-        private string _deleteIcon;
+        private bool hasError;
 
         [ObservableProperty]
-        private bool _errorMessageIsVisible;
+        private bool isBusy;
 
         [ObservableProperty]
-        private string _errorMessage;
+        private bool isDeleteButtonVisible = true;
 
-        [ObservableProperty]
-        private bool _isBusy;
-
-        [ObservableProperty]
-        private string _userImageBase64; // Base64 string for the user image	
-
-        [ObservableProperty]
-        private ImageSource _userImageSource;
-        #endregion
-
-        //public ImageSource UserImageSource => ImageSource.FromStream(() =>
-        //{
-        //	byte[] bytes = Convert.FromBase64String(UserImageBase64);
-        //	return new MemoryStream(bytes);
-        //});
-
-
-        public AccountViewModel(IAppUserRepository dbService, IAlertService alertService)
+        public AccountViewModel(IFinancialDataService dataService)
         {
-            _alertService = alertService;
-            _dbService = dbService;
-            DeleteIcon = FontHelper.DELETE_USER_ICON;
-            IsDeleteButtonVisible = false; // Initially hide the delete button	
-            if (!string.IsNullOrEmpty(UserImageBase64))
-            {
-                _userImageSource = ImageSource.FromStream(() =>
-                {
-                    byte[] bytes = Convert.FromBase64String(UserImageBase64);
-                    return new MemoryStream(bytes);
-                });
-            }
+            _dataService = dataService;
+            _ = LoadUserProfileAsync();
         }
 
-        [RelayCommand]
-        private async Task Delete()
+        public async Task LoadUserProfileAsync()
         {
-            bool confirm = await Shell.Current.DisplayAlert(
-                    "Admin",
-                    "Are you sure you want to delete this user?",
-                    "Yes",
-                    "No"
-                );
-
-            if (confirm) //Delete User from database
-            {
-                try
-                {
-                    IsBusy = true;
-                    await _dbService.DeleteAsync(RecievedUser);
-                    await Shell.Current.GoToAsync(".."); // Navigate back to the previous page
-                    IsBusy = false;
-                }
-                catch (Exception ex)
-                {
-                    IsBusy = false;
-                    await _alertService.ShowAlertAsync("KASATA", ex.Message, "OK");
-                }
-            }
-        }
-
-        [RelayCommand]
-        private async Task Update()
-        {
-            //await Toast.Make($"Error deleting user in DB: {ex.Message}", ToastDuration.Short, 14).Show();
-            ErrorMessageIsVisible = false;
-            if (!Validate())
-            {
-                //ErrorMessageIsVisible = true;
-                await _alertService.ShowAlertAsync("KASATA", ErrorMessage, "OK");
-                return;
-            }
-
-            AppUser? user = null;
-
-            // If RecievedUser is not null (Came from Admin), use it; otherwise, use the current user
-            if (RecievedUser != null)
-            {
-                user = RecievedUser;
-            }
-            else
-            {
-                user = (App.Current as App)!.CurrentUser!;
-            }
-
-            IsBusy = true;
             try
             {
-                user.FirstName = FirstName;
-                user.LastName = LastName;
-                user.UserMobile = UserMobile;
+                // איפוס שגיאות ומצב טעינה
+                IsBusy = true;
+                HasError = false;
+                ErrorMessage = string.Empty;
 
-                await _dbService.UpdateAsync(user);
-                IsBusy = false;
+                var profileData = await _dataService.GetCurrentUserProfileAsync();
 
-                await _alertService.ShowAlertAsync("KASATA", "User details updated successfully!", "OK");
+                if (profileData != null)
+                {
+                    FullName = profileData.ContainsKey("FullName") ? profileData["FullName"] : "";
+                    UserEmail = profileData.ContainsKey("Email") ? profileData["Email"] : "";
+                    PhoneNumber = profileData.ContainsKey("PhoneNumber") ? profileData["PhoneNumber"] : "";
+
+                    // בדיקה בטוחה של תמונת ה-Base64 מול פיירבייס
+                    if (profileData.ContainsKey("ImageBase64") && !string.IsNullOrEmpty(profileData["ImageBase64"]))
+                    {
+                        UserImageSource = profileData["ImageBase64"];
+                    }
+                    else
+                    {
+                        UserImageSource = "user_icon.png"; // תמונת ברירת מחדל מקומית
+                    }
+                }
             }
             catch (Exception ex)
             {
+                HasError = true;
+                ErrorMessage = "Failed to load profile data.";
+                System.Diagnostics.Debug.WriteLine($"Error loading profile: {ex.Message}");
+            }
+            finally
+            {
                 IsBusy = false;
-                await _alertService.ShowAlertAsync("KASATA", $"Error updating user details: {ex.Message}", "OK");
             }
         }
 
         [RelayCommand]
-        private void GetUserImage()
+        private async Task UpdateProfile()
         {
-            // Implement get user image functionality here
+            if (string.IsNullOrWhiteSpace(FullName))
+            {
+                HasError = true;
+                ErrorMessage = "Full Name cannot be empty.";
+                return;
+            }
+
+            try
+            {
+                IsBusy = true;
+                HasError = false;
+                ErrorMessage = string.Empty;
+
+                // בדיקה: אם התמונה היא עדיין קובץ מקומי ולא קוד Base64 אמיתי, לא נשלח אותה לשרת
+                string imageToSend = null;
+                if (!string.IsNullOrEmpty(UserImageSource) && !UserImageSource.EndsWith(".png") && !UserImageSource.EndsWith(".jpg"))
+                {
+                    imageToSend = UserImageSource;
+                }
+
+                // שליחת הנתונים המעובדים והבטוחים לשרת
+                bool isSuccess = await _dataService.UpdateUserProfileAsync(FullName, PhoneNumber, imageToSend);
+
+                if (isSuccess)
+                {
+                    await Shell.Current.DisplayAlert("Success", "Profile updated successfully!", "OK");
+                    await LoadUserProfileAsync(); // רענון הנתונים מהשרת לוודא סנכרון
+                }
+                else
+                {
+                    HasError = true;
+                    ErrorMessage = "Could not save updates to server.";
+                }
+            }
+            catch (Exception ex)
+            {
+                HasError = true;
+                ErrorMessage = $"Error saving profile: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
-        //AccountViewModel Entry Point
-        public void ApplyQueryAttributes(IDictionary<string, object> query)
+        [RelayCommand]
+        private async Task ChangeImage()
         {
-            RecievedUser = query.ContainsKey("selectedUser") ? (AppUser)query["selectedUser"] : null;
+            try
+            {
+                var result = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
+                {
+                    Title = "Please pick a profile photo"
+                });
 
-            if (RecievedUser != null) // Load the user from UsersListPage
-            {
-                LoadUserDetails(RecievedUser);
-                IsDeleteButtonVisible = RecievedUser.Id != (App.Current as App)!.CurrentUser!.Id; // Show delete button if not current user
+                if (result != null)
+                {
+                    using var stream = await result.OpenReadAsync();
+                    using var memoryStream = new MemoryStream();
+                    await stream.CopyToAsync(memoryStream);
+
+                    byte[] imageBytes = memoryStream.ToArray();
+
+                    // המרה ל-Base64 נקי
+                    UserImageSource = Convert.ToBase64String(imageBytes);
+                }
             }
-            else // Load the user from CurrentUser
+            catch (Exception ex)
             {
-                // If no user is received, load the current user details
-                LoadUserDetails((App.Current as App)!.CurrentUser!);
+                System.Diagnostics.Debug.WriteLine($"Error picking photo: {ex.Message}");
+                await Shell.Current.DisplayAlert("Error", "Failed to select image.", "OK");
             }
-        }
-        private void LoadUserDetails(AppUser user)
-        {
-            FirstName = user.FirstName!;
-            LastName = user.LastName!;
-            UserEmail = user.UserEmail!;
-            UserMobile = user.UserMobile!;
-            //UserImageBase64 = user.ImageBase64; // Load the user's image base64 string
-            UserImageBase64 = null!;
         }
 
-        #region Validation Methods
-        private bool Validate()
+        [RelayCommand]
+        private async Task DeleteAccount()
         {
-            var firstNameValid = ValidUserFirstName();
-            var lastNameValid = ValidUserLastName();
-            var mobileValid = ValidMobile();
-
-            return IsEmptyValidate() && firstNameValid && lastNameValid && mobileValid;
-        }
-        private bool IsEmptyValidate()
-        {
-            // Check if any of the required fields are empty
-            return !(string.IsNullOrWhiteSpace(FirstName) ||
-                   string.IsNullOrWhiteSpace(LastName) ||
-                   string.IsNullOrWhiteSpace(UserMobile));
-        }
-        private bool ValidUserFirstName()
-        {
-            if (FirstName.Length < 2)
+            bool confirm = await Shell.Current.DisplayAlert("Warning", "Are you sure?", "Yes", "No");
+            if (confirm)
             {
-                ErrorMessage = "First name too short!";
-                return false;
+                // לוגיקת מחיקה...
             }
-            return true;
         }
-        private bool ValidUserLastName()
-        {
-            if (LastName.Length < 2)
-            {
-                ErrorMessage = "Last name too short!";
-                return false;
-            }
-            return true;
-        }
-        private bool ValidMobile()
-        {
-            if (UserMobile!.Length != 10)
-            {
-                ErrorMessage = "Mobile must be between 10 and 15 characters long!";
-                return false;
-            }
-            return true;
-        }
-        #endregion
-
     }
 }
