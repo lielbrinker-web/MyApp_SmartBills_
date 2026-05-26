@@ -13,7 +13,7 @@
                      Priority="0" />
     </Shell.ToolbarItems>
 
-    <TabBar>
+    <TabBar x:Name="MainTabBar">
         <Tab Title="Dashboard">
             <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" />
         </Tab>
@@ -32,6 +32,10 @@
 
         <Tab Title="Account">
             <ShellContent ContentTemplate="{DataTemplate views:AccountView}" />
+        </Tab>
+
+        <Tab x:Name="AdminTab" Title="Admin Panel" IsVisible="False">
+            <ShellContent ContentTemplate="{DataTemplate views:AdminView}" />
         </Tab>
     </TabBar>
 

@@ -11,7 +11,7 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <Converters.Base64ToImageConverter x:Key="Base64ToImageConverter" />
+            <converters:Base64ToImageConverter x:Key="Base64ToImageConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -26,6 +26,8 @@
         <Grid ColumnDefinitions="0.1*,8*,0.1*" RowDefinitions="0.5*,2.5*,5.5*,*">
 
             <HorizontalStackLayout
+                Grid.Row="0"
+                Grid.Column="0"
                 Grid.ColumnSpan="3"
                 IsVisible="{Binding IsDeleteButtonVisible}"
                 Margin="20,10"
@@ -80,13 +82,13 @@
                 Grid.Row="2"
                 Grid.Column="1"
                 Spacing="15"
-                Margin="10,0">
+                Margin="10,20,10,0">
 
                 <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#20FFFFFF">
                     <Entry
                         Placeholder="Full Name"
-                        PlaceholderColor="#CCCCCC"
-                        Text="{Binding FullName}"
+                        PlaceholderColor="#B0FFFFFF"
+                        Text="{Binding FullName, Mode=TwoWay}"
                         TextColor="White"
                         FontSize="16" />
                 </Border>
@@ -94,10 +96,10 @@
                 <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#10FFFFFF">
                     <Entry
                         Placeholder="Email Address"
-                        PlaceholderColor="#CCCCCC"
+                        PlaceholderColor="#A0FFFFFF"
                         IsEnabled="False"
-                        Text="{Binding UserEmail}"
-                        TextColor="#BBBBBB"
+                        Text="{Binding UserEmail, Mode=TwoWay}"
+                        TextColor="#E0E0E0"
                         FontSize="16"
                         Keyboard="Email" />
                 </Border>
@@ -105,8 +107,8 @@
                 <Border Stroke="#A0FFFFFF" StrokeShape="RoundRectangle 12" Padding="15,0" HeightRequest="55" BackgroundColor="#20FFFFFF">
                     <Entry
                         Placeholder="Phone Number"
-                        PlaceholderColor="#CCCCCC"
-                        Text="{Binding PhoneNumber}"
+                        PlaceholderColor="#B0FFFFFF"
+                        Text="{Binding PhoneNumber, Mode=TwoWay}"
                         TextColor="White"
                         FontSize="16"
                         Keyboard="Telephone" />

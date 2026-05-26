@@ -15,86 +15,85 @@
         </LinearGradientBrush>
     </ContentPage.Background>
 
-    <Grid ColumnDefinitions="0.1*,8*,0.1*" RowDefinitions="Auto, Auto, *, Auto" Padding="20">
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="25" Spacing="25" MaximumWidthRequest="600" HorizontalOptions="CenterAndExpand">
 
-        <VerticalStackLayout Grid.Row="0" Grid.Column="1" Margin="0,20,0,30" Spacing="5" HorizontalOptions="Center">
-            <Label 
-                Text="Admin Control Center" 
-                TextColor="White" 
-                FontSize="28" 
-                FontAttributes="Bold" 
-                HorizontalOptions="Center" />
-            <Label 
-                Text="User Management and System Settings" 
-                TextColor="#CCCCCC" 
-                FontSize="14" 
-                HorizontalOptions="Center" />
-        </VerticalStackLayout>
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center" Margin="0,10,0,10">
+                    <Label 
+                        Text="Admin Control Center" 
+                        TextColor="White" 
+                        FontSize="28" 
+                        FontAttributes="Bold" 
+                        HorizontalOptions="Center" />
+                    <Label 
+                        Text="User Management and System Settings" 
+                        TextColor="#CCCCCC" 
+                        FontSize="14" 
+                        HorizontalOptions="Center" />
+                </VerticalStackLayout>
 
-        <Border Grid.Row="1" Grid.Column="1"
-                StrokeShape="RoundRectangle 20" 
-                Padding="20" 
-                BackgroundColor="#30FFFFFF" 
-                StrokeThickness="0"
-                Margin="0,0,0,20">
-            <VerticalStackLayout Spacing="15">
-                <Label Text="👤 Community Management" TextColor="White" FontSize="18" FontAttributes="Bold"/>
-                <Label Text="View all registered users, edit permissions, and manage accounts." 
-                       TextColor="#DDFFFFFF" 
-                       FontSize="14"/>
+                <Border StrokeShape="RoundRectangle 20" 
+                        Padding="20" 
+                        BackgroundColor="#30FFFFFF" 
+                        StrokeThickness="0">
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="👤 Community Management" TextColor="White" FontSize="18" FontAttributes="Bold"/>
+                        <Label Text="View all registered users, edit permissions, and manage accounts." 
+                               TextColor="#DDFFFFFF" 
+                               FontSize="14"/>
 
-                <Button 
-                    Text="View User List" 
-                    Command="{Binding NavigateToUsersListViewCommand}"
-                    BackgroundColor="#4CAF50"
-                    TextColor="White"
-                    FontAttributes="Bold"
-                    HeightRequest="50"
-                    CornerRadius="10" />
+                        <Button 
+                            Text="View User List" 
+                            Command="{Binding NavigateToUserListViewCommand}"
+                            BackgroundColor="#4CAF50"
+                            TextColor="White"
+                            FontAttributes="Bold"
+                            HeightRequest="50"
+                            CornerRadius="10" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="⚙️ System Settings" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="5,0"/>
+
+                    <Border StrokeShape="RoundRectangle 12" BackgroundColor="#15FFFFFF" Padding="15" StrokeThickness="0.5" Stroke="#50FFFFFF">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                <Label Text="Debug Mode" TextColor="White" FontSize="16" FontAttributes="Bold"/>
+                                <Label Text="Show real-time logs and development data" TextColor="#CCCCCC" FontSize="12"/>
+                            </VerticalStackLayout>
+                            <Switch 
+                                Grid.Column="1"
+                                IsToggled="{Binding IsDebugMode}" 
+                                OnColor="#4CAF50" 
+                                ThumbColor="White"
+                                VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Border StrokeShape="RoundRectangle 12" BackgroundColor="#15FFFFFF" Padding="15" StrokeThickness="0.5" Stroke="#50FFFFFF">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                <Label Text="Maintenance Mode" TextColor="White" FontSize="16" FontAttributes="Bold"/>
+                                <Label Text="Temporarily block user access" TextColor="#CCCCCC" FontSize="12"/>
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="False" OnColor="#FF3B30" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+
+                <Label Text="SmartBills Admin v1.0.4" 
+                       TextColor="#80FFFFFF" 
+                       FontSize="12" 
+                       HorizontalOptions="Center" 
+                       Margin="0,10,0,0"/>
+
             </VerticalStackLayout>
-        </Border>
+        </ScrollView>
 
-        <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="15">
-            <Label Text="⚙️ System Settings" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="5,0"/>
-
-            <Border StrokeShape="RoundRectangle 12" BackgroundColor="#15FFFFFF" Padding="15" StrokeThickness="0.5" Stroke="#50FFFFFF">
-                <Grid ColumnDefinitions="*, Auto">
-                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                        <Label Text="Debug Mode" TextColor="White" FontSize="16" FontAttributes="Bold"/>
-                        <Label Text="Show real-time logs and development data" TextColor="#CCCCCC" FontSize="12"/>
-                    </VerticalStackLayout>
-
-                    <Switch 
-                        Grid.Column="1"
-                        IsToggled="{Binding IsDebugMode}" 
-                        OnColor="#4CAF50" 
-                        ThumbColor="White"
-                        VerticalOptions="Center" />
-                </Grid>
-            </Border>
-
-            <Border StrokeShape="RoundRectangle 12" BackgroundColor="#15FFFFFF" Padding="15" StrokeThickness="0.5" Stroke="#50FFFFFF">
-                <Grid ColumnDefinitions="*, Auto">
-                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                        <Label Text="Maintenance Mode" TextColor="White" FontSize="16" FontAttributes="Bold"/>
-                        <Label Text="Temporarily block user access" TextColor="#CCCCCC" FontSize="12"/>
-                    </VerticalStackLayout>
-
-                    <Switch Grid.Column="1" IsToggled="False" OnColor="#FF3B30" VerticalOptions="Center" />
-                </Grid>
-            </Border>
-        </VerticalStackLayout>
-
-        <Label Grid.Row="3" Grid.Column="1" 
-               Text="SmartBills Admin v1.0.4" 
-               TextColor="#80FFFFFF" 
-               FontSize="12" 
-               HorizontalOptions="Center" 
-               Margin="0,20,0,0"/>
-
-        <Grid Grid.RowSpan="4" Grid.ColumnSpan="3" IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
-            <ActivityIndicator IsRunning="True" Color="White" VerticalOptions="Center" HorizontalOptions="Center"/>
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+            <ActivityIndicator IsRunning="True" Color="White" VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="50" HeightRequest="50"/>
         </Grid>
-
     </Grid>
 </ContentPage>

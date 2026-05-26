@@ -4,21 +4,22 @@ namespace MyApp_SmartBills.Views;
 
 public partial class UserListView : ContentPage
 {
-    public UserListView(UserListViewModel vm)
+    public UserListView(UserListViewModel viewModel)
     {
         InitializeComponent();
-        BindingContext = vm;
+        BindingContext = viewModel;
     }
-
-    
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
 
-        if (BindingContext is UserListViewModel vm)
+        // איפוס אוטומטי של המשתמש הנבחר בכל פעם שהדף עולה למסך
+        if (BindingContext is UserListViewModel viewModel)
         {
-            _ = vm.LoadUsersFromFirebase();
+            viewModel.ResetSelection();
+            // אופציונלי: ריענון הרשימה מחדש מפיירבייס בעת חזרה לדף
+            _ = viewModel.LoadUsersFromFirebase();
         }
     }
 }

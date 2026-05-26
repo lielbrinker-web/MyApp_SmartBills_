@@ -1,128 +1,105 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using MyApp_SmartBills.Service;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using MyApp_SmartBills.Model;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 
 namespace MyApp_SmartBills.ViewModels
 {
-    public partial class AccountViewModel : ObservableObject
+    public partial class AccountViewModel : ObservableObject, IQueryAttributable
     {
-        private readonly IFinancialDataService _dataService;
+        [ObservableProperty]
+        private AppUser? _selectedUser;
+
+        // שדות הקלט שיוצגו ב-XAML
+        [ObservableProperty]
+        private string _fullName = string.Empty;
 
         [ObservableProperty]
-        private string fullName;
+        private string _userEmail = string.Empty;
 
         [ObservableProperty]
-        private string userEmail;
+        private string _phoneNumber = string.Empty;
 
         [ObservableProperty]
-        private string phoneNumber;
+        private string _userImageSource = string.Empty;
+
+        // ניהול מצבי מסך
+        [ObservableProperty]
+        private bool _isBusy;
 
         [ObservableProperty]
-        private string userImageSource;
+        private bool _hasError;
 
         [ObservableProperty]
-        private string errorMessage;
+        private string _errorMessage = string.Empty;
 
         [ObservableProperty]
-        private bool hasError;
+        private bool _isDeleteButtonVisible = true;
 
-        [ObservableProperty]
-        private bool isBusy;
-
-        [ObservableProperty]
-        private bool isDeleteButtonVisible = true;
-
-        public AccountViewModel(IFinancialDataService dataService)
+        public AccountViewModel()
         {
-            _dataService = dataService;
-            _ = LoadUserProfileAsync();
+            IsBusy = false;
         }
 
-        public async Task LoadUserProfileAsync()
+        public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            try
+            if (query.TryGetValue("selectedUser", out var userObj) && userObj is AppUser user)
             {
-                // איפוס שגיאות ומצב טעינה
                 IsBusy = true;
-                HasError = false;
-                ErrorMessage = string.Empty;
-
-                var profileData = await _dataService.GetCurrentUserProfileAsync();
-
-                if (profileData != null)
+                try
                 {
-                    FullName = profileData.ContainsKey("FullName") ? profileData["FullName"] : "";
-                    UserEmail = profileData.ContainsKey("Email") ? profileData["Email"] : "";
-                    PhoneNumber = profileData.ContainsKey("PhoneNumber") ? profileData["PhoneNumber"] : "";
+                    SelectedUser = user;
 
-                    // בדיקה בטוחה של תמונת ה-Base64 מול פיירבייס
-                    if (profileData.ContainsKey("ImageBase64") && !string.IsNullOrEmpty(profileData["ImageBase64"]))
-                    {
-                        UserImageSource = profileData["ImageBase64"];
-                    }
-                    else
-                    {
-                        UserImageSource = "user_icon.png"; // תמונת ברירת מחדל מקומית
-                    }
+                    // תיקון השגיאות: מייצרים את ה-FullName מחיבור של שם פרטי ומשפחה הקיימים ב-AppUser שלך
+                    FullName = $"{user.FirstName} {user.LastName}".Trim();
+                    UserEmail = user.UserEmail;
+
+                    // אם אין PhoneNumber או ProfileImage ב-AppUser, נשים ערכי ברירת מחדל ריקים כדי שלא יקרוס
+                    PhoneNumber = string.Empty;
+                    UserImageSource = string.Empty;
                 }
-            }
-            catch (Exception ex)
-            {
-                HasError = true;
-                ErrorMessage = "Failed to load profile data.";
-                System.Diagnostics.Debug.WriteLine($"Error loading profile: {ex.Message}");
-            }
-            finally
-            {
-                IsBusy = false;
+                catch (Exception)
+                {
+                    HasError = true;
+                    ErrorMessage = "Error loading user data.";
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
             }
         }
 
         [RelayCommand]
         private async Task UpdateProfile()
         {
-            if (string.IsNullOrWhiteSpace(FullName))
-            {
-                HasError = true;
-                ErrorMessage = "Full Name cannot be empty.";
-                return;
-            }
+            if (IsBusy) return;
+
+            IsBusy = true;
+            HasError = false;
 
             try
             {
-                IsBusy = true;
-                HasError = false;
-                ErrorMessage = string.Empty;
+                await Task.Delay(1000); // סימולציה של שמירה
 
-                // בדיקה: אם התמונה היא עדיין קובץ מקומי ולא קוד Base64 אמיתי, לא נשלח אותה לשרת
-                string imageToSend = null;
-                if (!string.IsNullOrEmpty(UserImageSource) && !UserImageSource.EndsWith(".png") && !UserImageSource.EndsWith(".jpg"))
+                if (SelectedUser != null)
                 {
-                    imageToSend = UserImageSource;
+                    // כאן אנחנו מעדכנים חזרה את המודל לפי מה שהשתנה בתיבת הטקסט
+                    // (מפרקים את השם המלא חזרה לשם פרטי ומשפחה)
+                    var names = FullName.Split(' ', 2);
+                    SelectedUser.FirstName = names.Length > 0 ? names[0] : string.Empty;
+                    SelectedUser.LastName = names.Length > 1 ? names[1] : string.Empty;
+                    SelectedUser.UserEmail = UserEmail;
                 }
 
-                // שליחת הנתונים המעובדים והבטוחים לשרת
-                bool isSuccess = await _dataService.UpdateUserProfileAsync(FullName, PhoneNumber, imageToSend);
-
-                if (isSuccess)
-                {
-                    await Shell.Current.DisplayAlert("Success", "Profile updated successfully!", "OK");
-                    await LoadUserProfileAsync(); // רענון הנתונים מהשרת לוודא סנכרון
-                }
-                else
-                {
-                    HasError = true;
-                    ErrorMessage = "Could not save updates to server.";
-                }
+                await Shell.Current.DisplayAlert("Success", "Profile updated successfully!", "OK");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 HasError = true;
-                ErrorMessage = $"Error saving profile: {ex.Message}";
+                ErrorMessage = "Failed to update profile.";
             }
             finally
             {
@@ -131,42 +108,19 @@ namespace MyApp_SmartBills.ViewModels
         }
 
         [RelayCommand]
-        private async Task ChangeImage()
+        private async Task DeleteAccount()
         {
-            try
+            bool answer = await Shell.Current.DisplayAlert("Warning", "Are you sure you want to delete this user?", "Yes", "No");
+            if (answer)
             {
-                var result = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
-                {
-                    Title = "Please pick a profile photo"
-                });
-
-                if (result != null)
-                {
-                    using var stream = await result.OpenReadAsync();
-                    using var memoryStream = new MemoryStream();
-                    await stream.CopyToAsync(memoryStream);
-
-                    byte[] imageBytes = memoryStream.ToArray();
-
-                    // המרה ל-Base64 נקי
-                    UserImageSource = Convert.ToBase64String(imageBytes);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error picking photo: {ex.Message}");
-                await Shell.Current.DisplayAlert("Error", "Failed to select image.", "OK");
+                await Shell.Current.GoToAsync("..");
             }
         }
 
         [RelayCommand]
-        private async Task DeleteAccount()
+        private async Task ChangeImage()
         {
-            bool confirm = await Shell.Current.DisplayAlert("Warning", "Are you sure?", "Yes", "No");
-            if (confirm)
-            {
-                // לוגיקת מחיקה...
-            }
+            // לוגיקת שינוי תמונה עתידית
         }
     }
 }

@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
-    x:Class="MyApp_SmartBills.Views.UserListView"
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:models="clr-namespace:MyApp_SmartBills.Model"
-    xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
-    Title="User Management"
-    x:DataType="viewmodels:UserListViewModel"
-    FlowDirection="LeftToRight">
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyApp_SmartBills.Views.UserListView"
+             xmlns:viewmodels="clr-namespace:MyApp_SmartBills.ViewModels"
+             xmlns:models="clr-namespace:MyApp_SmartBills.Model"
+             Title="User Management"
+             x:DataType="viewmodels:UserListViewModel">
 
     <ContentPage.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -16,98 +14,87 @@
         </LinearGradientBrush>
     </ContentPage.Background>
 
-    <Grid RowDefinitions="Auto, Auto, *" Padding="10">
+    <Grid RowDefinitions="Auto, Auto, *">
 
-        <Label
-            Grid.Row="0"
-            Text="User List"
-            TextColor="White"
-            FontSize="28"
-            FontAttributes="Bold"
-            HorizontalOptions="Center"
-            Margin="0,10,0,20" />
+        <VerticalStackLayout Grid.Row="0" Spacing="5" HorizontalOptions="Center" Margin="0,20,0,10">
+            <Label Text="Users List" TextColor="White" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Label Text="Tap any user to edit details or delete account" TextColor="#B0C4DE" FontSize="13" HorizontalOptions="Center" />
+        </VerticalStackLayout>
 
-        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" ColumnSpacing="10" Margin="10,0,10,15">
-            <Border Grid.Column="0" StrokeShape="RoundRectangle 12" StrokeThickness="0" BackgroundColor="#20FFFFFF" HeightRequest="50">
-                <SearchBar 
-                    Placeholder="Search user..." 
-                    PlaceholderColor="#CCCCCC"
-                    Text="{Binding SearchText}" 
+        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="20,10" ColumnSpacing="10">
+            <SearchBar Grid.Column="0" 
+                       Placeholder="Find user..." 
+                       Text="{Binding SearchText}" 
+                       TextColor="White"
+                       PlaceholderColor="#A0FFFFFF"
+                       BackgroundColor="#15FFFFFF" />
+
+            <Button Grid.Column="1"
+                    Text="⏳"
+                    FontSize="18"
+                    BackgroundColor="#1e3c72"
                     TextColor="White"
-                    CancelButtonColor="White"
-                    BackgroundColor="Transparent" />
-            </Border>
-
-            <Button
-                Grid.Column="1"
-                Text="{Binding FilterIcon}"
-                FontFamily="MaterialIcons"
-                FontSize="22"
-                BackgroundColor="#4CAF50"
-                TextColor="White"
-                WidthRequest="55"
-                HeightRequest="50"
-                CornerRadius="12" />
+                    WidthRequest="50"
+                    HeightRequest="45"
+                    CornerRadius="8" />
         </Grid>
 
-        <CollectionView
-            Grid.Row="2"
-            ItemsSource="{Binding AllUsers}"
-            SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
-            SelectionChangedCommand="{Binding NavigateToAccountPageCommand}"
-            SelectionMode="Single">
-
-            <CollectionView.EmptyView>
-                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="30">
-                    <Label Text="🔍" FontSize="50" HorizontalOptions="Center" />
-                    <Label Text="No users found" TextColor="White" FontSize="20" HorizontalOptions="Center" />
-                    <Label Text="Try modifying your search query or pull down to refresh" TextColor="#CCCCCC" FontSize="14" HorizontalOptions="Center" />
-                </VerticalStackLayout>
-            </CollectionView.EmptyView>
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding UsersList}"
+                        SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
+                        SelectionChangedCommand="{Binding NavigateToAccountPageCommand}"
+                        SelectionMode="Single"
+                        Margin="10,0">
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:AppUser">
-                    <Border
-                        Margin="10,5"
-                        Padding="15"
-                        BackgroundColor="#15FFFFFF"
-                        Stroke="#40FFFFFF"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 15">
+                    <Border Margin="10,5"
+                            Padding="15,12"
+                            BackgroundColor="#15FFFFFF"
+                            Stroke="#30FFFFFF"
+                            StrokeShape="RoundRectangle 12">
 
-                        <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
+                        <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto" RowSpacing="4">
 
-                            <Border Grid.Column="0" HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22" StrokeThickness="0" Margin="0,0,12,0">
-                                <Image Source="user_icon.png" Aspect="AspectFill" />
-                            </Border>
+                            <HorizontalStackLayout Grid.Column="0" Grid.Row="0" Spacing="6">
+                                <Label Text="{Binding FirstName}" TextColor="White" FontAttributes="Bold" FontSize="16" />
+                                <Label Text="{Binding LastName}" TextColor="White" FontAttributes="Bold" FontSize="16" />
+                            </HorizontalStackLayout>
 
-                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                <HorizontalStackLayout Spacing="5">
-                                    <Label Text="{Binding FirstName}" TextColor="White" FontAttributes="Bold" FontSize="16" />
-                                    <Label Text="{Binding LastName}" TextColor="White" FontAttributes="Bold" FontSize="16" />
-                                </HorizontalStackLayout>
-                                <Label Text="{Binding UserEmail}" TextColor="#CCCCCC" FontSize="12" />
-                            </VerticalStackLayout>
+                            <Label Grid.Column="0" 
+                                   Grid.Row="1" 
+                                   Text="{Binding Email}" 
+                                   TextColor="#B0C4DE" 
+                                   FontSize="13" />
 
-                            <Border Grid.Column="2" BackgroundColor="#30FFFFFF" Padding="8,4" StrokeShape="RoundRectangle 10" StrokeThickness="0" VerticalOptions="Center">
-                                <Label 
-                                    Text="{Binding RegDate, StringFormat='{0:dd/MM/yyyy}'}" 
-                                    TextColor="White" 
-                                    FontSize="10" 
-                                    FontAttributes="Bold" />
+                            <Border Grid.Column="1" 
+                                    Grid.RowSpan="2"
+                                    BackgroundColor="#20000000"
+                                    Padding="10,5"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    VerticalOptions="Center">
+                                <Label Text="{Binding RegDate, StringFormat='{0:dd/MM/yyyy}'}" 
+                                       TextColor="White" 
+                                       FontSize="11" 
+                                       FontAttributes="Bold" 
+                                       VerticalOptions="Center"/>
                             </Border>
                         </Grid>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Margin="0,50" Spacing="10">
+                    <Label Text="🔍" FontSize="40" HorizontalOptions="Center"/>
+                    <Label Text="No users found" TextColor="White" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
         </CollectionView>
 
         <Grid Grid.RowSpan="3" IsVisible="{Binding IsBusy}" BackgroundColor="#AA000000">
-            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
-                <ActivityIndicator IsRunning="True" Color="#4CAF50" Scale="1.5" />
-                <Label Text="Loading users..." TextColor="White" />
-            </VerticalStackLayout>
+            <ActivityIndicator IsRunning="True" Color="White" VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="50" HeightRequest="50"/>
         </Grid>
     </Grid>
-
 </ContentPage>

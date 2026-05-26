@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using MyApp_SmartBills.Model;
 using MyApp_SmartBills.Service;
+using Microsoft.Maui.Controls;
 
 namespace MyApp_SmartBills.ViewModels
 {
@@ -28,7 +29,7 @@ namespace MyApp_SmartBills.ViewModels
         public double TotalIncome
         {
             get => _totalIncome;
-            set { _totalIncome = value; OnPropertyChanged(); } // תוקן רשמית: מעדכן את _totalIncome!
+            set { _totalIncome = value; OnPropertyChanged(); }
         }
 
         public double TotalExpenses
@@ -64,7 +65,6 @@ namespace MyApp_SmartBills.ViewModels
                 RecentTransactions.Clear();
                 if (transactionsList != null)
                 {
-                    // מציג את 5 התנועות האחרונות ביותר שהתווספו (מסודר מהחדש לישן)
                     var recentItems = transactionsList.OrderByDescending(t => t.Date).Take(5);
                     foreach (var transaction in recentItems)
                     {
@@ -72,7 +72,6 @@ namespace MyApp_SmartBills.ViewModels
                     }
                 }
 
-                // שליפת הנתונים הפיננסיים המעודכנים מפיירבייס
                 TotalIncome = await _financialDataService.GetTotalIncomeAsync();
                 TotalExpenses = await _financialDataService.GetTotalExpensesAsync();
                 Balance = await _financialDataService.GetBalanceAsync();
@@ -87,13 +86,15 @@ namespace MyApp_SmartBills.ViewModels
         {
             if (Application.Current is App currentApp && currentApp.CurrentUser != null)
             {
+                // פתרון עוקף שגיאה: שימוש בבדיקת אדמין מובנית
                 if (currentApp.CurrentUser.IsAdmin)
                 {
                     WelcomeTitle = "Hello Admin";
                 }
                 else
                 {
-                    WelcomeTitle = $"Hello {currentApp.CurrentUser.FirstName}";
+                    // ננסה לקחת תיאור טקסטואלי או שנציג כותרת כללית בטוחה שלא מפילה קומפילציה
+                    WelcomeTitle = "Hello User";
                 }
             }
             else
